@@ -9,6 +9,14 @@ python-dotenv
 requests
 scikit-image
 fastapi
-uvicorn
+uvicorn[standard]
 python-multipart
 sqlalchemy
+pillow
+numpy
+exifread
+geopy
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
