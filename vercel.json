@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "api.py",
+      "use": "@vercel/python"
+    },
+    {
       "src": "frontend-react/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -11,11 +15,15 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api.py"
+    },
+    {
       "src": "/(.*)",
       "dest": "/frontend-react/$1"
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "@react_app_api_url"
+    "REACT_APP_API_URL": "/api"
   }
 }
