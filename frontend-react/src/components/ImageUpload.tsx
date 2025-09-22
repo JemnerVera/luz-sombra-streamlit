@@ -266,7 +266,7 @@ export function ImageUpload({ onAnalysisComplete, onDataChange }: ImageUploadPro
   }, [onDataChange]);
 
   // Función para validar todos los campos requeridos
-  const validateRequiredFields = () => {
+  const validateRequiredFields = useCallback(() => {
     const missingFields = [];
     
     // Validar campos generales obligatorios
@@ -299,7 +299,7 @@ export function ImageUpload({ onAnalysisComplete, onDataChange }: ImageUploadPro
       generalMissingFields: missingFields,
       imagesWithMissingFields: imagesWithMissingFields
     };
-  };
+  }, [empresa, fundo, sector, lote, images]);
 
   const analyzeImages = useCallback(async () => {
     if (images.length === 0) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ImageUpload } from './ImageUpload';
 import { AnalysisResults } from './AnalysisResults';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { Upload } from 'lucide-react';
 

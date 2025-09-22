@@ -19,9 +19,6 @@ export function AnalysisResults({ results }: AnalysisResultsProps) {
     return null;
   }
 
-  const avgLight = results.reduce((acc, r) => acc + r.light_percentage, 0) / results.length;
-  const avgShadow = results.reduce((acc, r) => acc + r.shadow_percentage, 0) / results.length;
-  const avgProcessingTime = results.reduce((acc, r) => acc + r.processing_time, 0) / results.length;
 
   return (
     <div className="space-y-6">
