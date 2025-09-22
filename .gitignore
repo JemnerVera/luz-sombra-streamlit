@@ -68,6 +68,8 @@ logs/
 # Google Sheets credentials
 credentials.json
 token.json
+google_sheets_config.json
+vercel_env_vars.txt
 
 # Temporary files
 *.tmp

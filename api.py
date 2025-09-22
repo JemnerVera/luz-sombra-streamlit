@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 import json
 import os
+import base64
 from datetime import datetime
 
 # from src.database.models import ProcesamientoImagen, create_database, get_database_url  # Deshabilitado - usando solo Google Sheets
@@ -13,6 +14,44 @@ from datetime import datetime
 from src.services.procesamiento_service_v2 import ProcesamientoServiceV2
 from src.google_sheets.sheets_client import GoogleSheetsClient
 
+
+# Función para cargar configuración desde variables de entorno o archivo
+def load_google_sheets_config():
+    """Carga la configuración de Google Sheets desde variables de entorno o archivo"""
+    config = {}
+    
+    # Intentar cargar desde variables de entorno primero
+    if os.getenv('GOOGLE_SHEETS_SPREADSHEET_ID'):
+        config['spreadsheet_id'] = os.getenv('GOOGLE_SHEETS_SPREADSHEET_ID')
+        config['sheet_name'] = os.getenv('GOOGLE_SHEETS_SHEET_NAME', 'Data-app')
+        
+        # Cargar credenciales desde Base64 si están disponibles
+        if os.getenv('GOOGLE_SHEETS_CREDENTIALS_BASE64'):
+            credentials_b64 = os.getenv('GOOGLE_SHEETS_CREDENTIALS_BASE64')
+            credentials_json = base64.b64decode(credentials_b64).decode('utf-8')
+            config['credentials'] = json.loads(credentials_json)
+        
+        # Cargar token desde Base64 si está disponible
+        if os.getenv('GOOGLE_SHEETS_TOKEN_BASE64'):
+            token_b64 = os.getenv('GOOGLE_SHEETS_TOKEN_BASE64')
+            token_json = base64.b64decode(token_b64).decode('utf-8')
+            config['token'] = json.loads(token_json)
+            
+        return config
+    
+    # Fallback: cargar desde archivo (para desarrollo local)
+    try:
+        with open('google_sheets_config.json', 'r') as f:
+            file_config = json.load(f)
+            config.update(file_config)
+    except FileNotFoundError:
+        print("⚠️ No se encontró google_sheets_config.json y no hay variables de entorno configuradas")
+        config = {
+            'spreadsheet_id': 'demo',
+            'sheet_name': 'Data-app'
+        }
+    
+    return config
 
 # Crear la aplicación FastAPI
 app = FastAPI(
@@ -45,9 +84,7 @@ async def get_next_sequential_id() -> str:
     """
     try:
         # Cargar configuración
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         sheet_name = config.get('sheet_name', 'Data-app')
         
@@ -109,9 +146,7 @@ def guardar_en_google_sheets_directo(record_data):
     """
     try:
         # Cargar configuración
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         
         if not spreadsheet_id:
@@ -148,9 +183,7 @@ def guardar_en_google_sheets(registro_db, metadata=None):
     """
     try:
         # Cargar configuración
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         
         if not spreadsheet_id:
@@ -226,9 +259,7 @@ async def obtener_historial():
     """
     try:
         # Cargar configuración de Google Sheets
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         
         if not spreadsheet_id:
@@ -294,9 +325,7 @@ async def obtener_estadisticas():
     """
     try:
         # Cargar configuración de Google Sheets
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         
         if not spreadsheet_id:
@@ -648,9 +677,7 @@ async def google_sheets_records(limit: int = 10):
     - **limit**: Número máximo de registros a obtener (default: 10)
     """
     try:
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         
         if not spreadsheet_id:
@@ -679,9 +706,7 @@ async def google_sheets_url():
     Obtiene la URL de la hoja de cálculo de Google Sheets
     """
     try:
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         
         if not spreadsheet_id:
@@ -833,9 +858,7 @@ async def update_headers():
     Fuerza la actualización de los encabezados de la hoja Data-app
     """
     try:
-        with open('google_sheets_config.json', 'r') as f:
-            config = json.load(f)
-        
+        config = load_google_sheets_config()
         spreadsheet_id = config.get('spreadsheet_id')
         sheet_name = config.get('sheet_name', 'Data-app')
         
