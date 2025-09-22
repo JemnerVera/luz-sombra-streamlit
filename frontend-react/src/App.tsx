@@ -95,7 +95,7 @@ function App() {
     if (activeTab === 'historial' && historial.length === 0) {
       cargarHistorial();
     }
-  }, [activeTab]);
+  }, [activeTab, historial.length]);
 
   return (
     <div className="min-h-screen bg-background flex">
