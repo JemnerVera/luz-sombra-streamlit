@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Download, ExternalLink } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 

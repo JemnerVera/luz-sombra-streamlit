@@ -172,20 +172,6 @@ export function ImageUpload({ onAnalysisComplete, onDataChange }: ImageUploadPro
     }
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  }, []);
-
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    handleFiles(files);
-  }, []);
-
   const handleFiles = useCallback(async (files: File[]) => {
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
@@ -208,7 +194,21 @@ export function ImageUpload({ onAnalysisComplete, onDataChange }: ImageUploadPro
       };
       reader.readAsDataURL(file);
     }
-  }, []);
+  }, [onDataChange]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  }, [handleFiles]);
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    handleFiles(files);
+  }, [handleFiles]);
 
   const removeImage = useCallback((index: number) => {
     setImages((prev) => {
@@ -360,7 +360,7 @@ export function ImageUpload({ onAnalysisComplete, onDataChange }: ImageUploadPro
     }
 
     setAnalyzing(false);
-  }, [images, onAnalysisComplete, empresa, fundo, sector, lote]);
+  }, [images, onAnalysisComplete, empresa, fundo, sector, lote, validateRequiredFields]);
 
   return (
     <div className="space-y-6">
