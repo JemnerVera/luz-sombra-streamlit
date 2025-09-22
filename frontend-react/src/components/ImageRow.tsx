@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Eye, FileImage, Crop } from 'lucide-react';
+import { X, Eye, FileImage, Crop, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { ImageModal } from './ImageModal';
@@ -9,6 +9,12 @@ interface UploadedImage {
   preview: string;
   hilera?: string;
   numeroPlanta?: string;
+  hasGps?: boolean;
+  gpsData?: {
+    latitud: number;
+    longitud: number;
+    direccion: string;
+  };
   analysis?: {
     light_percentage: number;
     shadow_percentage: number;
@@ -48,6 +54,14 @@ export function ImageRow({ image, index, onRemove, onCrop, onUpdateImage }: Imag
               <div className="flex items-center gap-2 mb-1">
                 <FileImage className="h-4 w-4 text-muted-foreground" />
                 <p className="font-medium truncate">{image.file.name}</p>
+                {image.hasGps !== undefined && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className={`h-3 w-3 ${image.hasGps ? 'text-green-500' : 'text-red-500'}`} />
+                    <span className={`text-xs ${image.hasGps ? 'text-green-600' : 'text-red-600'}`}>
+                      {image.hasGps ? 'GPS' : 'Sin GPS'}
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-sm text-muted-foreground">
                 {(image.file.size / 1024 / 1024).toFixed(2)} MB
@@ -84,17 +98,25 @@ export function ImageRow({ image, index, onRemove, onCrop, onUpdateImage }: Imag
               <div className="flex gap-1">
                 <input
                   type="text"
-                  placeholder="Hilera"
+                  placeholder={image.hasGps === false ? "Hilera *" : "Hilera"}
                   value={image.hilera || ''}
                   onChange={(e) => onUpdateImage?.(index, { hilera: e.target.value })}
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+                  className={`w-16 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 ${
+                    image.hasGps === false && !image.hilera?.trim() 
+                      ? 'border-red-500 bg-red-50' 
+                      : 'border-gray-300'
+                  }`}
                 />
                 <input
                   type="text"
-                  placeholder="N° planta"
+                  placeholder={image.hasGps === false ? "N° planta *" : "N° planta"}
                   value={image.numeroPlanta || ''}
                   onChange={(e) => onUpdateImage?.(index, { numeroPlanta: e.target.value })}
-                  className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+                  className={`w-16 px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 ${
+                    image.hasGps === false && !image.numeroPlanta?.trim() 
+                      ? 'border-red-500 bg-red-50' 
+                      : 'border-gray-300'
+                  }`}
                 />
               </div>
               

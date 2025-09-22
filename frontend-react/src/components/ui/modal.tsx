@@ -20,17 +20,19 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
       
       {/* Modal Content */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+      <div className="relative bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+        {/* Header - Solo se muestra si hay título */}
+        {title && (
+          <div className="flex items-center justify-between p-6 border-b border-gray-700">
+            <h2 className="text-lg font-semibold text-white">{title}</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
         
         {/* Body */}
         <div className="p-6">

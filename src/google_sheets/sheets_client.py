@@ -120,18 +120,18 @@ class GoogleSheetsClient:
             bool: True si se configuraron correctamente
         """
         try:
-            headers = [
-                'ID', 'Fecha', 'Hora', 'Imagen', 'Empresa', 'Fundo', 'Sector', 'Lote', 'Hilera', 'N° Planta',
-                'Latitud', 'Longitud', 'Porcentaje Luz', 'Porcentaje Sombra',
-                'Dispositivo', 'Software', 'Dirección', 'Timestamp'
-            ]
+        headers = [
+            'ID', 'Fecha', 'Hora', 'Imagen', 'Nombre Archivo', 'Empresa', 'Fundo', 'Sector', 'Lote', 'Hilera', 'N° Planta',
+            'Latitud', 'Longitud', 'Porcentaje Luz', 'Porcentaje Sombra',
+            'Dispositivo', 'Software', 'Dirección', 'Timestamp'
+        ]
             
             body = {
                 'values': [headers]
             }
             
             # Usar el nombre de la hoja especificado o el por defecto
-            range_name = f"'{sheet_name}'!A1:R1" if sheet_name else 'A1:R1'
+            range_name = f"'{sheet_name}'!A1:S1" if sheet_name else 'A1:S1'
             
             self.service.spreadsheets().values().update(
                 spreadsheetId=spreadsheet_id,
@@ -160,7 +160,7 @@ class GoogleSheetsClient:
         """
         try:
             # Obtener encabezados actuales
-            range_name = f"'{sheet_name}'!A1:R1" if sheet_name else 'A1:R1'
+            range_name = f"'{sheet_name}'!A1:S1" if sheet_name else 'A1:S1'
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=spreadsheet_id,
                 range=range_name
@@ -170,7 +170,7 @@ class GoogleSheetsClient:
             
             # Encabezados esperados
             expected_headers = [
-                'ID', 'Fecha', 'Hora', 'Imagen', 'Empresa', 'Fundo', 'Sector', 'Lote', 'Hilera', 'N° Planta',
+                'ID', 'Fecha', 'Hora', 'Imagen', 'Nombre Archivo', 'Empresa', 'Fundo', 'Sector', 'Lote', 'Hilera', 'N° Planta',
                 'Latitud', 'Longitud', 'Porcentaje Luz', 'Porcentaje Sombra',
                 'Dispositivo', 'Software', 'Dirección', 'Timestamp'
             ]
@@ -237,6 +237,7 @@ class GoogleSheetsClient:
                 record.get('fecha', ''),
                 record.get('hora', ''),
                 record.get('imagen', ''),
+                record.get('nombre_archivo', ''),  # Nueva columna: Nombre Archivo
                 record.get('empresa', ''),
                 record.get('fundo', ''),
                 record.get('sector', ''),
@@ -261,7 +262,7 @@ class GoogleSheetsClient:
             }
             
             # Usar el nombre de la hoja especificado o el por defecto
-            range_name = f"'{sheet_name}'!A:R" if sheet_name else 'A:R'
+            range_name = f"'{sheet_name}'!A:S" if sheet_name else 'A:S'
             
             self.service.spreadsheets().values().append(
                 spreadsheetId=spreadsheet_id,
@@ -292,7 +293,7 @@ class GoogleSheetsClient:
         """
         try:
             # Usar el nombre de la hoja especificado o el por defecto
-            range_name = f"'{sheet_name}'!A2:R{limit + 1}" if sheet_name else f'A2:R{limit + 1}'
+            range_name = f"'{sheet_name}'!A2:S{limit + 1}" if sheet_name else f'A2:S{limit + 1}'
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=spreadsheet_id,
                 range=range_name
@@ -302,26 +303,27 @@ class GoogleSheetsClient:
             records = []
             
             for row in values:
-                if len(row) >= 18:  # Asegurar que tenemos todas las columnas
+                if len(row) >= 19:  # Asegurar que tenemos todas las columnas (ahora 19)
                     record = {
                         'id': row[0] if len(row) > 0 else '',
                         'fecha': row[1] if len(row) > 1 else '',
                         'hora': row[2] if len(row) > 2 else '',
                         'imagen': row[3] if len(row) > 3 else '',
-                        'empresa': row[4] if len(row) > 4 else '',
-                        'fundo': row[5] if len(row) > 5 else '',
-                        'sector': row[6] if len(row) > 6 else '',
-                        'lote': row[7] if len(row) > 7 else '',
-                        'hilera': row[8] if len(row) > 8 else '',
-                        'numero_planta': row[9] if len(row) > 9 else '',
-                        'latitud': row[10] if len(row) > 10 else '',
-                        'longitud': row[11] if len(row) > 11 else '',
-                        'porcentaje_luz': row[12] if len(row) > 12 else '',
-                        'porcentaje_sombra': row[13] if len(row) > 13 else '',
-                        'dispositivo': row[14] if len(row) > 14 else '',
-                        'software': row[15] if len(row) > 15 else '',
-                        'direccion': row[16] if len(row) > 16 else '',
-                        'timestamp': row[17] if len(row) > 17 else ''
+                        'nombre_archivo': row[4] if len(row) > 4 else '',  # Nueva columna
+                        'empresa': row[5] if len(row) > 5 else '',
+                        'fundo': row[6] if len(row) > 6 else '',
+                        'sector': row[7] if len(row) > 7 else '',
+                        'lote': row[8] if len(row) > 8 else '',
+                        'hilera': row[9] if len(row) > 9 else '',
+                        'numero_planta': row[10] if len(row) > 10 else '',
+                        'latitud': row[11] if len(row) > 11 else '',
+                        'longitud': row[12] if len(row) > 12 else '',
+                        'porcentaje_luz': row[13] if len(row) > 13 else '',
+                        'porcentaje_sombra': row[14] if len(row) > 14 else '',
+                        'dispositivo': row[15] if len(row) > 15 else '',
+                        'software': row[16] if len(row) > 16 else '',
+                        'direccion': row[17] if len(row) > 17 else '',
+                        'timestamp': row[18] if len(row) > 18 else ''
                     }
                     
                     # Debug: imprimir los primeros registros para verificar el mapeo

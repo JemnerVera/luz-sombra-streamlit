@@ -17,9 +17,10 @@ interface AnalysisResult {
 interface AnalyzeTabProps {
   analysisResults: AnalysisResult[];
   onAnalysisComplete: (result: AnalysisResult) => void;
+  onDataChange?: () => void;
 }
 
-export function AnalyzeTab({ analysisResults, onAnalysisComplete }: AnalyzeTabProps) {
+export function AnalyzeTab({ analysisResults, onAnalysisComplete, onDataChange }: AnalyzeTabProps) {
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -31,7 +32,7 @@ export function AnalyzeTab({ analysisResults, onAnalysisComplete }: AnalyzeTabPr
       {analysisResults.length === 0 && (
         <Card className="border-2">
           <CardContent className="p-6">
-            <ImageUpload onAnalysisComplete={onAnalysisComplete} />
+            <ImageUpload onAnalysisComplete={onAnalysisComplete} onDataChange={onDataChange} />
           </CardContent>
         </Card>
       )}

@@ -467,6 +467,7 @@ async def procesar_imagen_simple(
                 'fecha': fecha_tomada.strftime("%Y-%m-%d") if fecha_tomada else datetime.now().strftime("%Y-%m-%d"),
                 'hora': fecha_tomada.strftime("%H:%M:%S") if fecha_tomada else datetime.now().strftime("%H:%M:%S"),
                 'imagen': imagen.filename or '',
+                'nombre_archivo': imagen.filename or '',  # Nueva columna: Nombre Archivo
                 'empresa': empresa or '',
                 'fundo': fundo or '',
                 'sector': sector or '',
@@ -696,6 +697,44 @@ async def google_sheets_url():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo URL: {str(e)}")
+
+@app.post("/check-gps-info")
+async def check_gps_info(file: UploadFile = File(...)):
+    """
+    Verifica si una imagen tiene información GPS en los metadatos EXIF
+    """
+    try:
+        # Leer el contenido del archivo
+        image_bytes = await file.read()
+        
+        # Usar el extractor de GPS para verificar si hay datos GPS
+        from src.metadata.gps_extractor import GPSExtractor
+        gps_extractor = GPSExtractor()
+        
+        # Extraer datos GPS
+        gps_data = gps_extractor._extract_gps_data(image_bytes)
+        
+        # Verificar si hay información GPS válida
+        has_gps = (
+            gps_data.get('latitud') is not None and 
+            gps_data.get('longitud') is not None and
+            gps_data.get('latitud') != 0 and 
+            gps_data.get('longitud') != 0
+        )
+        
+        return {
+            "has_gps": has_gps,
+            "gps_data": gps_data if has_gps else None,
+            "message": "GPS encontrado" if has_gps else "No se encontró información GPS"
+        }
+        
+    except Exception as e:
+        print(f"❌ Error verificando GPS: {e}")
+        return {
+            "has_gps": False,
+            "gps_data": None,
+            "message": f"Error verificando GPS: {str(e)}"
+        }
 
 @app.get("/google-sheets/field-data")
 async def get_field_data():

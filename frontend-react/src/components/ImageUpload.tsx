@@ -13,6 +13,12 @@ interface UploadedImage {
   preview: string;
   hilera?: string;
   numeroPlanta?: string;
+  hasGps?: boolean;
+  gpsData?: {
+    latitud: number;
+    longitud: number;
+    direccion: string;
+  };
   analysis?: {
     light_percentage: number;
     shadow_percentage: number;
@@ -22,9 +28,10 @@ interface UploadedImage {
 
 interface ImageUploadProps {
   onAnalysisComplete?: (result: any) => void;
+  onDataChange?: () => void;
 }
 
-export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
+export function ImageUpload({ onAnalysisComplete, onDataChange }: ImageUploadProps) {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -37,6 +44,16 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
   const [showModal, setShowModal] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
   const [croppingImageIndex, setCroppingImageIndex] = useState<number | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{
+    generalMissingFields: string[];
+    imagesWithMissingFields: Array<{
+      filename: string;
+      missingFields: string[];
+    }>;
+  }>({
+    generalMissingFields: [],
+    imagesWithMissingFields: []
+  });
   const [fieldData, setFieldData] = useState({
     empresa: [],
     fundo: [],
@@ -97,17 +114,52 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
     setFundo('');
     setSector('');
     setLote('');
+    onDataChange?.();
   };
 
   const handleFundoChange = (value: string) => {
     setFundo(value);
     setSector('');
     setLote('');
+    onDataChange?.();
   };
 
   const handleSectorChange = (value: string) => {
     setSector(value);
     setLote('');
+    onDataChange?.();
+  };
+
+  const handleLoteChange = (value: string) => {
+    setLote(value);
+    onDataChange?.();
+  };
+
+  // Función para verificar si una imagen tiene GPS
+  const checkImageGps = async (file: File): Promise<{hasGps: boolean, gpsData?: any}> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('http://localhost:8000/check-gps-info', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          hasGps: data.has_gps,
+          gpsData: data.gps_data
+        };
+      } else {
+        console.error('Error verificando GPS:', response.statusText);
+        return { hasGps: false };
+      }
+    } catch (error) {
+      console.error('Error verificando GPS:', error);
+      return { hasGps: false };
+    }
   };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -134,18 +186,28 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
     handleFiles(files);
   }, []);
 
-  const handleFiles = useCallback((files: File[]) => {
+  const handleFiles = useCallback(async (files: File[]) => {
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
-    imageFiles.forEach((file) => {
+    for (const file of imageFiles) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const preview = e.target?.result as string;
-        setImages((prev) => [...prev, { file, preview }]);
+        
+        // Verificar si la imagen tiene GPS
+        const gpsInfo = await checkImageGps(file);
+        
+        setImages((prev) => [...prev, { 
+          file, 
+          preview, 
+          hasGps: gpsInfo.hasGps,
+          gpsData: gpsInfo.gpsData
+        }]);
         setShowUploadArea(false); // Ocultar área de upload después de cargar
+        onDataChange?.(); // Notificar que hay datos sin guardar
       };
       reader.readAsDataURL(file);
-    });
+    }
   }, []);
 
   const removeImage = useCallback((index: number) => {
@@ -200,7 +262,44 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
         i === index ? { ...img, ...updates } : img
       )
     );
-  }, []);
+    onDataChange?.(); // Notificar que hay datos sin guardar
+  }, [onDataChange]);
+
+  // Función para validar todos los campos requeridos
+  const validateRequiredFields = () => {
+    const missingFields = [];
+    
+    // Validar campos generales obligatorios
+    if (!empresa.trim()) missingFields.push('Empresa');
+    if (!fundo.trim()) missingFields.push('Fundo');
+    if (!sector.trim()) missingFields.push('Sector');
+    if (!lote.trim()) missingFields.push('Lote');
+    
+    // Validar campos obligatorios para imágenes sin GPS
+    const imagesWithoutGps = images.filter(img => !img.hasGps);
+    const imagesWithMissingFields = [];
+    
+    for (let i = 0; i < imagesWithoutGps.length; i++) {
+      const image = imagesWithoutGps[i];
+      const imageMissingFields = [];
+      
+      if (!image.hilera?.trim()) imageMissingFields.push('Hilera');
+      if (!image.numeroPlanta?.trim()) imageMissingFields.push('N° planta');
+      
+      if (imageMissingFields.length > 0) {
+        imagesWithMissingFields.push({
+          filename: image.file.name,
+          missingFields: imageMissingFields
+        });
+      }
+    }
+    
+    return {
+      hasErrors: missingFields.length > 0 || imagesWithMissingFields.length > 0,
+      generalMissingFields: missingFields,
+      imagesWithMissingFields: imagesWithMissingFields
+    };
+  };
 
   const analyzeImages = useCallback(async () => {
     if (images.length === 0) {
@@ -208,7 +307,13 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
       return;
     }
     
-    if (!empresa.trim() || !fundo.trim()) {
+    // Validar todos los campos requeridos
+    const validation = validateRequiredFields();
+    if (validation.hasErrors) {
+      setValidationErrors({
+        generalMissingFields: validation.generalMissingFields,
+        imagesWithMissingFields: validation.imagesWithMissingFields
+      });
       setShowModal(true);
       return;
     }
@@ -306,7 +411,7 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
                     <SearchableDropdown
                       options={getFilteredLotes()}
                       value={lote}
-                      onChange={setLote}
+                      onChange={handleLoteChange}
                       placeholder="Seleccionar lote"
                     />
                   </div>
@@ -429,18 +534,85 @@ export function ImageUpload({ onAnalysisComplete }: ImageUploadProps) {
         </div>
       )}
 
-      {/* Modal de validación */}
+      {/* Modal de validación dinámico */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title="Información requerida"
       >
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            Por favor, selecciona la empresa y el fundo antes de analizar las imágenes.
-          </p>
-          <div className="flex justify-end">
-            <Button onClick={() => setShowModal(false)}>
+        <div className="space-y-6">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-white mb-2">
+              Campos obligatorios faltantes
+            </h3>
+            <p className="text-sm text-gray-300">
+              Completa la siguiente información antes de analizar las imágenes:
+            </p>
+          </div>
+          
+          {/* Campos generales faltantes */}
+          {validationErrors.generalMissingFields.length > 0 && (
+            <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-sm font-medium text-red-800">Información general requerida:</h4>
+                  <div className="mt-2 text-sm text-red-700">
+                    <ul className="list-disc list-inside space-y-1">
+                      {validationErrors.generalMissingFields.map((field, index) => (
+                        <li key={index} className="font-medium">{field}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Campos faltantes por imagen */}
+          {validationErrors.imagesWithMissingFields.length > 0 && (
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-sm font-medium text-amber-800">Ubicación específica requerida (imágenes sin GPS):</h4>
+                  <div className="mt-2 text-sm text-amber-700">
+                    <div className="space-y-3">
+                      {validationErrors.imagesWithMissingFields.map((imageError, index) => (
+                        <div key={index} className="bg-amber-100 p-3 rounded-lg">
+                          <p className="font-medium text-amber-900 mb-1">{imageError.filename}:</p>
+                          <ul className="list-disc list-inside ml-4 space-y-1">
+                            {imageError.missingFields.map((field, fieldIndex) => (
+                              <li key={fieldIndex} className="font-medium">{field}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-center pt-4">
+            <Button 
+              onClick={() => setShowModal(false)}
+              className="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors"
+            >
               Entendido
             </Button>
           </div>
