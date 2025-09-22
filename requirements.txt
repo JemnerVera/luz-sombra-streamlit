@@ -1,0 +1,14 @@
+opencv-python
+pandas
+shapely
+scikit-learn
+matplotlib
+joblib
+streamlit
+python-dotenv
+requests
+scikit-image
+fastapi
+uvicorn
+python-multipart
+sqlalchemy
