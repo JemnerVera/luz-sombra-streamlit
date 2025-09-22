@@ -120,11 +120,11 @@ class GoogleSheetsClient:
             bool: True si se configuraron correctamente
         """
         try:
-        headers = [
-            'ID', 'Fecha', 'Hora', 'Imagen', 'Nombre Archivo', 'Empresa', 'Fundo', 'Sector', 'Lote', 'Hilera', 'N° Planta',
-            'Latitud', 'Longitud', 'Porcentaje Luz', 'Porcentaje Sombra',
-            'Dispositivo', 'Software', 'Dirección', 'Timestamp'
-        ]
+            headers = [
+                'ID', 'Fecha', 'Hora', 'Imagen', 'Nombre Archivo', 'Empresa', 'Fundo', 'Sector', 'Lote', 'Hilera', 'N° Planta',
+                'Latitud', 'Longitud', 'Porcentaje Luz', 'Porcentaje Sombra',
+                'Dispositivo', 'Software', 'Dirección', 'Timestamp'
+            ]
             
             body = {
                 'values': [headers]
