@@ -234,21 +234,6 @@ def guardar_en_google_sheets(registro_db, metadata=None):
         print(f"❌ Error en Google Sheets: {e}")
         return False
 
-@app.get("/")
-async def root():
-    """
-    Endpoint raíz con información de la API
-    """
-    return {
-        "message": "API Agrícola Luz-Sombra",
-        "version": "1.0.0",
-        "endpoints": {
-            "procesar_imagen": "/procesar-imagen",
-            "historial": "/historial",
-            "imagen_resultado": "/imagen-resultado/{procesamiento_id}",
-            "health": "/health"
-        }
-    }
 
 @app.get("/health")
 async def health_check():
