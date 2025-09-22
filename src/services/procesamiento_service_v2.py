@@ -3,6 +3,7 @@ import json
 import cv2
 import numpy as np
 import pickle
+import joblib
 from datetime import datetime
 from typing import Dict, Any, Tuple
 import tempfile
@@ -24,13 +25,31 @@ class ProcesamientoServiceV2:
     def _cargar_modelo(self):
         """Carga el modelo perfeccionado"""
         try:
-            with open(self.modelo_path, 'rb') as f:
-                self.modelo, self.scaler = pickle.load(f)
-            # El modelo también incluye el encoder
-            if len(pickle.load(open(self.modelo_path, 'rb'))) == 3:
+            # Intentar cargar con joblib primero (más robusto)
+            try:
                 with open(self.modelo_path, 'rb') as f:
-                    self.modelo, self.scaler, self.encoder = pickle.load(f)
-            print(f"✅ Modelo cargado desde: {self.modelo_path}")
+                    data = joblib.load(f)
+                    if isinstance(data, tuple) and len(data) >= 2:
+                        self.modelo, self.scaler = data[0], data[1]
+                        if len(data) == 3:
+                            self.encoder = data[2]
+                    else:
+                        self.modelo = data
+                print(f"✅ Modelo cargado con joblib desde: {self.modelo_path}")
+            except Exception as joblib_error:
+                print(f"⚠️ Joblib falló, intentando con pickle: {joblib_error}")
+                # Fallback a pickle si joblib falla
+                with open(self.modelo_path, 'rb') as f:
+                    self.modelo, self.scaler = pickle.load(f)
+                # El modelo también incluye el encoder
+                try:
+                    with open(self.modelo_path, 'rb') as f:
+                        data = pickle.load(f)
+                        if len(data) == 3:
+                            self.modelo, self.scaler, self.encoder = data
+                except:
+                    pass
+                print(f"✅ Modelo cargado con pickle desde: {self.modelo_path}")
         except Exception as e:
             print(f"❌ Error cargando modelo: {e}")
             raise
