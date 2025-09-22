@@ -130,47 +130,65 @@ export function HistoryTab({ historial, cargandoHistorial, onCargarHistorial }: 
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-xs">
                         <thead>
                           <tr className="border-b">
-                            <th className="text-left py-3 px-4 font-medium">ID</th>
-                            <th className="text-left py-3 px-4 font-medium">Empresa</th>
-                            <th className="text-left py-3 px-4 font-medium">Fundo</th>
-                            <th className="text-left py-3 px-4 font-medium">Sector</th>
-                            <th className="text-left py-3 px-4 font-medium">Lote</th>
-                            <th className="text-left py-3 px-4 font-medium">Hilera</th>
-                            <th className="text-left py-3 px-4 font-medium">N° Planta</th>
-                            <th className="text-right py-3 px-4 font-medium">Luz (%)</th>
-                            <th className="text-right py-3 px-4 font-medium">Sombra (%)</th>
-                            <th className="text-left py-3 px-4 font-medium">Latitud</th>
-                            <th className="text-left py-3 px-4 font-medium">Longitud</th>
-                            <th className="text-left py-3 px-4 font-medium">Fecha</th>
+                            <th className="text-left py-2 px-2 font-medium w-12">ID</th>
+                            <th className="text-left py-2 px-2 font-medium w-20">Empresa</th>
+                            <th className="text-left py-2 px-2 font-medium w-24">Fundo</th>
+                            <th className="text-left py-2 px-2 font-medium w-16">Sector</th>
+                            <th className="text-left py-2 px-2 font-medium w-16">Lote</th>
+                            <th className="text-left py-2 px-2 font-medium w-12">Hilera</th>
+                            <th className="text-left py-2 px-2 font-medium w-16">N° Planta</th>
+                            <th className="text-right py-2 px-2 font-medium w-16">Luz (%)</th>
+                            <th className="text-right py-2 px-2 font-medium w-16">Sombra (%)</th>
+                            <th className="text-left py-2 px-2 font-medium w-20">Latitud</th>
+                            <th className="text-left py-2 px-2 font-medium w-20">Longitud</th>
+                            <th className="text-left py-2 px-2 font-medium w-28">Fecha</th>
                           </tr>
                         </thead>
                 <tbody>
                   {paginatedData.map((item) => (
                     <tr key={item.id} className="border-b hover:bg-muted/50 transition-colors">
-                      <td className="py-4 px-4 font-mono text-sm">{item.id}</td>
-                      <td className="py-4 px-4 font-medium">{item.empresa || 'N/A'}</td>
-                      <td className="py-4 px-4 font-medium">{item.fundo}</td>
-                      <td className="py-4 px-4 font-medium">{item.sector || 'N/A'}</td>
-                      <td className="py-4 px-4 font-medium">{item.lote || 'N/A'}</td>
-                      <td className="py-4 px-4 font-medium">{item.hilera || 'N/A'}</td>
-                      <td className="py-4 px-4 font-medium">{item.numero_planta || 'N/A'}</td>
-                      <td className="py-4 px-4 text-right font-medium text-chart-1">
+                      <td className="py-2 px-2 font-mono text-xs">{item.id}</td>
+                      <td className="py-2 px-2 font-medium text-xs truncate max-w-20" title={item.empresa || 'N/A'}>
+                        {item.empresa || 'N/A'}
+                      </td>
+                      <td className="py-2 px-2 font-medium text-xs truncate max-w-24" title={item.fundo}>
+                        {item.fundo}
+                      </td>
+                      <td className="py-2 px-2 font-medium text-xs truncate max-w-16" title={item.sector || 'N/A'}>
+                        {item.sector || 'N/A'}
+                      </td>
+                      <td className="py-2 px-2 font-medium text-xs truncate max-w-16" title={item.lote || 'N/A'}>
+                        {item.lote || 'N/A'}
+                      </td>
+                      <td className="py-2 px-2 font-medium text-xs text-center">
+                        {item.hilera || 'N/A'}
+                      </td>
+                      <td className="py-2 px-2 font-medium text-xs text-center">
+                        {item.numero_planta || 'N/A'}
+                      </td>
+                      <td className="py-2 px-2 text-right font-medium text-xs text-chart-1">
                         {item.porcentaje_luz.toFixed(1)}%
                       </td>
-                      <td className="py-4 px-4 text-right font-medium text-chart-2">
+                      <td className="py-2 px-2 text-right font-medium text-xs text-chart-2">
                         {item.porcentaje_sombra.toFixed(1)}%
                       </td>
-                      <td className="py-4 px-4 text-muted-foreground text-sm">
+                      <td className="py-2 px-2 text-muted-foreground text-xs">
                         {item.latitud ? item.latitud.toFixed(4) : 'N/A'}
                       </td>
-                      <td className="py-4 px-4 text-muted-foreground text-sm">
+                      <td className="py-2 px-2 text-muted-foreground text-xs">
                         {item.longitud ? item.longitud.toFixed(4) : 'N/A'}
                       </td>
-                      <td className="py-4 px-4 text-muted-foreground text-sm">
-                        {new Date(item.timestamp).toLocaleString()}
+                      <td className="py-2 px-2 text-muted-foreground text-xs">
+                        {new Date(item.timestamp).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </td>
                     </tr>
                   ))}
