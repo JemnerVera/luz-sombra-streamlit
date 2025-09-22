@@ -60,6 +60,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Ruta de salud para Railway
+@app.get("/")
+async def root():
+    return {"message": "API Agrícola Luz-Sombra funcionando correctamente", "status": "healthy"}
+
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
