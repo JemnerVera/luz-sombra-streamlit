@@ -11,8 +11,10 @@ from typing import List, Dict, Any, Optional
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import streamlit as st
 
 # Scopes necesarios para Google Sheets
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -25,15 +27,27 @@ class GoogleSheetsClient:
         self.token_file = token_file
         self.service = None
         self.creds = None
+        self.use_streamlit_secrets = False
         
-        # Cargar configuración de Google Sheets
+        # Intentar cargar desde Streamlit secrets primero (para producción)
         try:
-            with open('google_sheets_config.json', 'r') as f:
-                config = json.load(f)
-                self.spreadsheet_id = config.get('spreadsheet_id')
+            if hasattr(st, 'secrets') and 'google_sheets' in st.secrets:
+                self.spreadsheet_id = st.secrets.google_sheets.spreadsheet_id
+                self.use_streamlit_secrets = True
+                print("✅ Usando secrets de Streamlit Cloud")
+            else:
+                raise Exception("No hay secrets de Streamlit")
         except Exception as e:
-            print(f"⚠️ Error cargando configuración: {e}")
-            self.spreadsheet_id = None
+            print(f"⚠️ No se encontraron secrets de Streamlit: {e}")
+            # Fallback a configuración local
+            try:
+                with open('google_sheets_config.json', 'r') as f:
+                    config = json.load(f)
+                    self.spreadsheet_id = config.get('spreadsheet_id')
+                print("✅ Usando configuración local")
+            except Exception as e2:
+                print(f"⚠️ Error cargando configuración local: {e2}")
+                self.spreadsheet_id = None
         
     def authenticate(self) -> bool:
         """
@@ -42,6 +56,51 @@ class GoogleSheetsClient:
         Returns:
             bool: True si la autenticación fue exitosa
         """
+        try:
+            if self.use_streamlit_secrets:
+                # Usar Service Account desde Streamlit secrets
+                return self._authenticate_with_service_account()
+            else:
+                # Usar OAuth2 local
+                return self._authenticate_with_oauth2()
+                
+        except Exception as e:
+            print(f"❌ Error en autenticación: {e}")
+            return False
+    
+    def _authenticate_with_service_account(self) -> bool:
+        """Autenticación usando Service Account desde Streamlit secrets"""
+        try:
+            # Crear credenciales desde secrets
+            service_account_info = {
+                "type": "service_account",
+                "project_id": st.secrets.google_sheets.project_id,
+                "private_key_id": "dummy",  # No necesario para autenticación
+                "private_key": st.secrets.google_sheets.private_key,
+                "client_email": st.secrets.google_sheets.client_email,
+                "client_id": "dummy",  # No necesario para autenticación
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": st.secrets.google_sheets.token_uri,
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url": f"https://www.googleapis.com/robot/v1/metadata/x509/{st.secrets.google_sheets.client_email}",
+                "universe_domain": "googleapis.com"
+            }
+            
+            # Crear credenciales
+            self.creds = service_account.Credentials.from_service_account_info(
+                service_account_info, scopes=SCOPES)
+            
+            # Construir el servicio
+            self.service = build('sheets', 'v4', credentials=self.creds)
+            print("✅ Autenticación con Service Account exitosa")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error en autenticación con Service Account: {e}")
+            return False
+    
+    def _authenticate_with_oauth2(self) -> bool:
+        """Autenticación usando OAuth2 local"""
         try:
             # Cargar credenciales existentes
             if os.path.exists(self.token_file):
@@ -67,11 +126,11 @@ class GoogleSheetsClient:
             
             # Construir el servicio
             self.service = build('sheets', 'v4', credentials=self.creds)
-            print("✅ Autenticación con Google Sheets exitosa")
+            print("✅ Autenticación con OAuth2 exitosa")
             return True
             
         except Exception as e:
-            print(f"❌ Error en autenticación: {e}")
+            print(f"❌ Error en autenticación OAuth2: {e}")
             return False
     
     def create_spreadsheet(self, title: str = "Agricola Luz-Sombra") -> Optional[str]:
