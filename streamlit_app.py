@@ -8,6 +8,8 @@ import io
 import base64
 from datetime import datetime
 import json
+import os
+import requests
 
 # Configuración de página
 st.set_page_config(
@@ -16,6 +18,26 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Función para descargar modelo si no existe
+@st.cache_data
+def download_model_if_needed():
+    """Descarga el modelo si no existe localmente"""
+    model_path = "modelo_perfeccionado.pkl"
+    
+    if not os.path.exists(model_path):
+        st.warning("⚠️ Modelo no encontrado localmente. Necesitas subirlo manualmente.")
+        st.info("""
+        **Para usar la aplicación:**
+        1. Descarga `modelo_perfeccionado.pkl` desde tu repositorio local
+        2. Súbelo a la raíz del proyecto
+        3. O configura la URL de descarga en secrets
+        """)
+        return False
+    return True
+
+# Verificar si el modelo existe
+model_available = download_model_if_needed()
 
 # CSS personalizado para replicar la interfaz actual
 st.markdown("""
@@ -199,6 +221,11 @@ def load_sheet_data():
 def analizar_imagen_ml(image_bytes):
     """Analizar imagen usando el modelo Random Forest original"""
     try:
+        # Verificar si el modelo está disponible
+        if not model_available:
+            st.error("❌ Modelo no disponible. Por favor, sube el archivo modelo_perfeccionado.pkl")
+            return None
+            
         # Importar el servicio de procesamiento original
         import sys
         import os
