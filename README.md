@@ -1,166 +1,110 @@
-# 🌱 Proyecto Agrícola Luz-Sombra Supervisado
+# 🌱 Análisis Agrícola - Luz y Sombra
 
-Sistema inteligente de análisis de imágenes agrícolas que utiliza machine learning para calcular porcentajes de luz y sombra en imágenes tomadas desde dispositivos móviles.
+Aplicación Streamlit para el análisis de luz y sombra en imágenes agrícolas usando Machine Learning.
 
-## ✨ Características
+## 🚀 Características
 
-- 🤖 **Machine Learning Avanzado**: Modelo perfeccionado con análisis detallado de etiquetas
-- 📱 **Optimizado para Móviles**: Entrenado específicamente con imágenes de teléfonos
-- 🎨 **Interfaz Moderna**: Frontend React con visualizaciones interactivas
-- ⚡ **API REST**: Backend FastAPI de alto rendimiento
-- 💾 **Persistencia**: Base de datos SQLite para almacenamiento de resultados
-- 📊 **Visualizaciones**: Gráficos interactivos con Recharts
+- **Análisis de Imágenes**: Procesamiento de múltiples imágenes con modelo Random Forest
+- **Probar Modelo**: Visualización comparativa de análisis de luz y sombra
+- **Historial**: Registro completo de análisis en Google Sheets
+- **Interfaz Intuitiva**: Dropdowns dinámicos con filtros jerárquicos
+- **Integración Google Sheets**: Sincronización automática de datos
 
-## 🚀 Inicio Rápido
+## 📋 Requisitos
 
-### Opción 1: Ejecutar Todo (Recomendado)
+- Python 3.8+
+- Streamlit
+- OpenCV
+- scikit-learn
+- Google Sheets API
+
+## 🛠️ Instalación
+
+1. **Clonar el repositorio:**
 ```bash
-# Doble clic en start_app.bat
-# O ejecutar desde terminal:
-start_app.bat
+git clone https://github.com/JemnerVera/luz-sombra-streamlit.git
+cd luz-sombra-streamlit
 ```
 
-### Opción 2: Ejecutar por Separado
-
-**Backend:**
+2. **Crear entorno virtual:**
 ```bash
-start_backend.bat
-# O manualmente:
-.\venv\Scripts\python.exe api.py
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
 ```
 
-**Frontend:**
+3. **Instalar dependencias:**
 ```bash
-start_frontend.bat
-# O manualmente:
-cd frontend-react && npm start
+pip install -r requirements_streamlit.txt
 ```
+
+4. **Configurar Google Sheets:**
+   - Copiar `google_sheets_config.json` con tus credenciales
+   - Configurar `credentials.json` para la API de Google Sheets
+
+## 🎯 Uso
+
+1. **Ejecutar la aplicación:**
+```bash
+streamlit run streamlit_app.py --server.port 8504
+```
+
+2. **Abrir en el navegador:**
+   - URL: http://localhost:8504
+
+## 📊 Funcionalidades
+
+### Analizar Imágenes
+- Selección de campos: Empresa, Fundo, Sector, Lote
+- Carga múltiple de imágenes
+- Análisis con modelo Random Forest
+- Guardado automático en Google Sheets
+
+### Probar Modelo
+- Visualización comparativa
+- Análisis de luz (amarillo) y sombra (gris oscuro)
+- Métricas de porcentaje
+
+### Historial
+- Registro completo de análisis
+- Filtros y búsqueda
+- Exportación a CSV
+
+## 🔧 Configuración
+
+### Google Sheets
+1. Crear proyecto en Google Cloud Console
+2. Habilitar Google Sheets API
+3. Crear credenciales OAuth 2.0
+4. Configurar `google_sheets_config.json`
+
+### Modelo ML
+- El modelo se carga desde `modelo_perfeccionado.pkl`
+- Usa Random Forest de scikit-learn
+- Análisis de características de imagen optimizadas
 
 ## 📁 Estructura del Proyecto
 
 ```
-agricola-luz-sombra-supervisado/
-├── 🚀 start_app.bat              # Ejecutar aplicación completa
-├── 🔧 start_backend.bat          # Solo backend
-├── 🎨 start_frontend.bat         # Solo frontend
-├── ⚙️ config.py                  # Configuración del proyecto
-├── 🤖 api.py                     # API FastAPI principal
-├── 🧠 modelo_perfeccionado.pkl   # Modelo ML entrenado
-├── 📊 database/                  # Base de datos SQLite
-├── 🎯 src/                       # Código fuente del backend
-│   ├── database/                 # Modelos y configuración de BD
-│   ├── services/                 # Servicios de procesamiento
-│   └── procesamiento/            # Módulos de procesamiento
-├── 🎨 frontend-react/            # Aplicación React
-├── 📸 dataset/                   # Datos de entrenamiento
-│   ├── imagenes/                 # Imágenes de ejemplo
-│   └── anotaciones/              # Archivos JSON de LabelMe
-└── 📋 requirements.txt           # Dependencias de Python
+luz-sombra-streamlit/
+├── streamlit_app.py              # Aplicación principal
+├── requirements_streamlit.txt    # Dependencias Python
+├── src/
+│   ├── services/
+│   │   └── procesamiento_service_v2.py  # Servicio de ML
+│   └── google_sheets/
+│       └── sheets_client.py      # Cliente Google Sheets
+├── modelo_perfeccionado.pkl      # Modelo entrenado
+├── google_sheets_config.json     # Configuración Google Sheets
+├── credentials.json              # Credenciales API
+└── README.md
 ```
-
-## 🎯 Uso
-
-1. **Ejecutar**: `start_app.bat` o doble clic
-2. **Subir imágenes**: Arrastra y suelta imágenes en la interfaz
-3. **Ver resultados**: Análisis automático con visualizaciones
-4. **Explorar datos**: Historial y estadísticas detalladas
-
-## 🔗 URLs de Acceso
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **Documentación API**: http://localhost:8000/docs
-
-## 🧠 Modelo de Machine Learning
-
-### Características Analizadas:
-- 🎨 **RGB**: Valores de color rojo, verde, azul
-- 🌈 **HSV**: Matiz, saturación, valor
-- 💡 **Luminancia**: Brillo percibido
-- 🎯 **Saturación**: Intensidad del color
-- 🌿 **NDVI**: Índice de vegetación aproximado
-- 🔍 **Textura**: Análisis de varianza local
-
-### Precisión:
-- ✅ **99% de precisión** en clasificación luz/sombra
-- 🎯 **Entrenado con datos reales** de imágenes móviles
-- 🔄 **Optimizado** para características específicas de troncos
-
-## 📊 Resultados del Análisis
-
-- **Foto1**: 38.0% Luz, 62.0% Sombra
-- **Foto2**: 45.0% Luz, 55.0% Sombra
-
-## 🛠️ Tecnologías
-
-### Backend:
-- **FastAPI**: Framework web moderno
-- **SQLAlchemy**: ORM para base de datos
-- **OpenCV**: Procesamiento de imágenes
-- **Scikit-learn**: Machine learning
-- **SQLite**: Base de datos ligera
-
-### Frontend:
-- **React 18**: Biblioteca de UI
-- **TypeScript**: Tipado estático
-- **Tailwind CSS**: Framework de estilos
-- **Recharts**: Gráficos interactivos
-- **Radix UI**: Componentes accesibles
-
-## 📈 API Endpoints
-
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `GET` | `/` | Información de la API |
-| `GET` | `/health` | Estado de la API |
-| `POST` | `/procesar-imagen` | Procesar imagen con anotaciones |
-| `GET` | `/historial` | Obtener historial de procesamientos |
-| `GET` | `/imagen-resultado/{id}` | Obtener imagen resultado |
-| `GET` | `/estadisticas` | Estadísticas generales |
-
-## 🔧 Instalación Manual
-
-### Backend:
-```bash
-# Crear entorno virtual
-python -m venv venv
-
-# Activar entorno virtual
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
-
-# Instalar dependencias
-pip install -r requirements.txt
-
-# Ejecutar API
-python api.py
-```
-
-### Frontend:
-```bash
-# Navegar al directorio
-cd frontend-react
-
-# Instalar dependencias
-npm install
-
-# Ejecutar aplicación
-npm start
-```
-
-## 📝 Notas Importantes
-
-- ✅ **Modelo optimizado** para imágenes de móviles
-- 🎨 **Colores correctos**: Amarillo (luz), Gris (sombra), Rojo (troncos)
-- 📱 **Compatible** con imágenes JPG/PNG
-- 🔄 **Tiempo real**: Procesamiento instantáneo
-- 💾 **Persistencia**: Resultados guardados automáticamente
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
+2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir Pull Request
 
@@ -168,6 +112,12 @@ npm start
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
----
+## 👥 Autores
 
-**Desarrollado con ❤️ para el análisis agrícola inteligente**
+- **Jemner Vera** - *Desarrollo inicial* - [JemnerVera](https://github.com/JemnerVera)
+
+## 🙏 Agradecimientos
+
+- Modelo de Machine Learning desarrollado con scikit-learn
+- Integración con Google Sheets API
+- Interfaz desarrollada con Streamlit

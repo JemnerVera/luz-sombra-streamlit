@@ -21,12 +21,35 @@ wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
+# Virtual Environment
 venv/
 env/
 ENV/
 env.bak/
 venv.bak/
+
+# Streamlit
+.streamlit/
+
+# Google Sheets credentials
+credentials.json
+token.json
+google_sheets_config.json
+
+# Model files (if large)
+*.pkl
+*.joblib
+*.h5
+*.pb
+
+# Images (test images)
+foto-prueba-*.jpg
+foto-prueba-*.png
+foto-prueba-*.jpeg
+
+# Logs
+*.log
+logs/
 
 # IDE
 .vscode/
@@ -44,19 +67,21 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# Node.js
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Node.js (if any)
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# React build
-frontend-react/build/
-frontend-react/dist/
-
-# Logs
-*.log
-logs/
+# React build (if any)
+build/
+dist/
 
 # Environment variables
 .env
@@ -65,12 +90,15 @@ logs/
 .env.test.local
 .env.production.local
 
-# Google Sheets credentials
-credentials.json
-token.json
-google_sheets_config.json
-vercel_env_vars.txt
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# Temporary files
-*.tmp
-*.temp
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json

@@ -26,6 +26,15 @@ class GoogleSheetsClient:
         self.service = None
         self.creds = None
         
+        # Cargar configuración de Google Sheets
+        try:
+            with open('google_sheets_config.json', 'r') as f:
+                config = json.load(f)
+                self.spreadsheet_id = config.get('spreadsheet_id')
+        except Exception as e:
+            print(f"⚠️ Error cargando configuración: {e}")
+            self.spreadsheet_id = None
+        
     def authenticate(self) -> bool:
         """
         Autentica con Google Sheets API
@@ -215,6 +224,40 @@ class GoogleSheetsClient:
         print("🔄 Forzando actualización de encabezados...")
         return self._setup_headers(spreadsheet_id, sheet_name)
     
+    def _get_next_id(self, spreadsheet_id: str, sheet_name: str = None) -> int:
+        """
+        Obtiene el siguiente ID secuencial
+        
+        Args:
+            spreadsheet_id: ID de la hoja de cálculo
+            sheet_name: Nombre de la hoja
+            
+        Returns:
+            int: Siguiente ID disponible
+        """
+        try:
+            # Obtener registros existentes
+            records = self.get_processing_records(spreadsheet_id, limit=1000, sheet_name=sheet_name)
+            
+            if not records:
+                return 1
+            
+            # Encontrar el ID más alto
+            max_id = 0
+            for record in records:
+                try:
+                    record_id = int(record.get('id', 0))
+                    if record_id > max_id:
+                        max_id = record_id
+                except (ValueError, TypeError):
+                    continue
+            
+            return max_id + 1
+            
+        except Exception as e:
+            print(f"⚠️ Error obteniendo siguiente ID: {e}")
+            return 1
+
     def add_processing_record(self, spreadsheet_id: str, record: Dict[str, Any], sheet_name: str = None) -> bool:
         """
         Agrega un registro de procesamiento a la hoja de cálculo
@@ -231,13 +274,18 @@ class GoogleSheetsClient:
             # Verificar y actualizar encabezados si es necesario
             self.ensure_headers_updated(spreadsheet_id, sheet_name)
             
-            # Preparar datos para la fila
+            # Generar ID automáticamente si no se proporciona
+            if not record.get('id') or record.get('id') == '':
+                next_id = self._get_next_id(spreadsheet_id, sheet_name)
+                record['id'] = str(next_id)
+                print(f"🆔 ID generado automáticamente: {next_id}")
+            
+            # Preparar datos para la fila (18 columnas, sin "Nombre Archivo")
             row_data = [
                 record.get('id', ''),
                 record.get('fecha', ''),
                 record.get('hora', ''),
                 record.get('imagen', ''),
-                record.get('nombre_archivo', ''),  # Nueva columna: Nombre Archivo
                 record.get('empresa', ''),
                 record.get('fundo', ''),
                 record.get('sector', ''),
@@ -262,7 +310,7 @@ class GoogleSheetsClient:
             }
             
             # Usar el nombre de la hoja especificado o el por defecto
-            range_name = f"'{sheet_name}'!A:S" if sheet_name else 'A:S'
+            range_name = f"'{sheet_name}'!A:R" if sheet_name else 'A:R'
             
             self.service.spreadsheets().values().append(
                 spreadsheetId=spreadsheet_id,
@@ -279,6 +327,71 @@ class GoogleSheetsClient:
             print(f"❌ Error agregando registro: {e}")
             return False
     
+    def get_sheet_data(self, sheet_name: str) -> List[List[str]]:
+        """
+        Obtiene todos los datos de una hoja
+        
+        Args:
+            sheet_name: Nombre de la hoja
+            
+        Returns:
+            List[List[str]]: Lista de filas con datos
+        """
+        try:
+            if not self.authenticate():
+                return []
+            
+            # Construir rango de toda la hoja
+            range_name = f"{sheet_name}!A:Z"  # A hasta Z columnas
+            
+            # Obtener datos
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.spreadsheet_id,
+                range=range_name
+            ).execute()
+            
+            values = result.get('values', [])
+            return values
+            
+        except Exception as e:
+            print(f"❌ Error obteniendo datos de hoja {sheet_name}: {e}")
+            return []
+
+    def get_column_data(self, sheet_name: str, column: str) -> List[str]:
+        """
+        Obtiene todos los datos de una columna específica
+        
+        Args:
+            sheet_name: Nombre de la hoja
+            column: Columna (ej: 'A', 'B', 'C', etc.)
+            
+        Returns:
+            List[str]: Lista de valores de la columna
+        """
+        try:
+            if not self.authenticate():
+                return []
+            
+            # Construir rango de la columna
+            range_name = f"{sheet_name}!{column}:{column}"
+            
+            # Obtener datos
+            result = self.service.spreadsheets().values().get(
+                spreadsheetId=self.spreadsheet_id,
+                range=range_name
+            ).execute()
+            
+            values = result.get('values', [])
+            
+            # Flatten la lista (cada fila es una lista con un elemento)
+            column_data = [row[0] if row else '' for row in values]
+            
+            return column_data
+            
+        except Exception as e:
+            print(f"❌ Error obteniendo datos de columna {column}: {e}")
+            return []
+
     def get_processing_records(self, spreadsheet_id: str, limit: int = 100, sheet_name: str = None) -> List[Dict[str, Any]]:
         """
         Obtiene los registros de procesamiento de la hoja de cálculo
@@ -293,7 +406,7 @@ class GoogleSheetsClient:
         """
         try:
             # Usar el nombre de la hoja especificado o el por defecto
-            range_name = f"'{sheet_name}'!A2:S{limit + 1}" if sheet_name else f'A2:S{limit + 1}'
+            range_name = f"'{sheet_name}'!A2:R{limit + 1}" if sheet_name else f'A2:R{limit + 1}'
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=spreadsheet_id,
                 range=range_name
@@ -303,27 +416,26 @@ class GoogleSheetsClient:
             records = []
             
             for row in values:
-                if len(row) >= 19:  # Asegurar que tenemos todas las columnas (ahora 19)
+                if len(row) >= 18:  # Ajustar para 18 columnas (sin "Nombre Archivo")
                     record = {
                         'id': row[0] if len(row) > 0 else '',
                         'fecha': row[1] if len(row) > 1 else '',
                         'hora': row[2] if len(row) > 2 else '',
                         'imagen': row[3] if len(row) > 3 else '',
-                        'nombre_archivo': row[4] if len(row) > 4 else '',  # Nueva columna
-                        'empresa': row[5] if len(row) > 5 else '',
-                        'fundo': row[6] if len(row) > 6 else '',
-                        'sector': row[7] if len(row) > 7 else '',
-                        'lote': row[8] if len(row) > 8 else '',
-                        'hilera': row[9] if len(row) > 9 else '',
-                        'numero_planta': row[10] if len(row) > 10 else '',
-                        'latitud': row[11] if len(row) > 11 else '',
-                        'longitud': row[12] if len(row) > 12 else '',
-                        'porcentaje_luz': row[13] if len(row) > 13 else '',
-                        'porcentaje_sombra': row[14] if len(row) > 14 else '',
-                        'dispositivo': row[15] if len(row) > 15 else '',
-                        'software': row[16] if len(row) > 16 else '',
-                        'direccion': row[17] if len(row) > 17 else '',
-                        'timestamp': row[18] if len(row) > 18 else ''
+                        'empresa': row[4] if len(row) > 4 else '',
+                        'fundo': row[5] if len(row) > 5 else '',
+                        'sector': row[6] if len(row) > 6 else '',
+                        'lote': row[7] if len(row) > 7 else '',
+                        'hilera': row[8] if len(row) > 8 else '',
+                        'numero_planta': row[9] if len(row) > 9 else '',
+                        'latitud': row[10] if len(row) > 10 else '',
+                        'longitud': row[11] if len(row) > 11 else '',
+                        'porcentaje_luz': row[12] if len(row) > 12 else '',
+                        'porcentaje_sombra': row[13] if len(row) > 13 else '',
+                        'dispositivo': row[14] if len(row) > 14 else '',
+                        'software': row[15] if len(row) > 15 else '',
+                        'direccion': row[16] if len(row) > 16 else '',
+                        'timestamp': row[17] if len(row) > 17 else ''
                     }
                     
                     # Debug: imprimir los primeros registros para verificar el mapeo
