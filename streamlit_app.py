@@ -59,10 +59,10 @@ st.markdown("""
     }
     
     .file-row {
-        background-color: #1e293b;
-        padding: 1rem;
+        background-color: transparent !important;
+        padding: 0.5rem;
         border-radius: 0.5rem;
-        border: 1px solid #334155;
+        border: 1px solid #e5e7eb;
         margin: 0.5rem 0;
         display: block;
     }
@@ -80,17 +80,18 @@ st.markdown("""
     }
     
     .stTextInput > div > div > input {
-        background-color: #374151;
-        color: white;
-        border: 1px solid #4b5563;
+        background-color: white !important;
+        color: #1f2937 !important;
+        border: 1px solid #d1d5db !important;
         border-radius: 0.375rem;
         padding: 0.5rem;
         font-size: 0.875rem;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 1px #3b82f6;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 1px #3b82f6 !important;
+        background-color: white !important;
     }
     
     .stButton > button {
@@ -333,7 +334,7 @@ if page == "Analizar Imágenes":
             filtered_fundos = sorted(list(set(filtered_fundos)))
             
             if filtered_fundos:
-                fundo = st.selectbox("Fundo *", filtered_fundos)
+                fundo = st.selectbox("Fundo *", [""] + filtered_fundos, index=0)
             else:
                 st.warning("⚠️ No hay fundos disponibles para esta empresa")
                 fundo = None
@@ -358,7 +359,7 @@ if page == "Analizar Imágenes":
             filtered_sectores = sorted(list(set(filtered_sectores)))
             
             if filtered_sectores:
-                sector = st.selectbox("Sector *", filtered_sectores)
+                sector = st.selectbox("Sector *", [""] + filtered_sectores, index=0)
             else:
                 st.warning("⚠️ No hay sectores disponibles para este fundo")
                 sector = None
@@ -383,7 +384,7 @@ if page == "Analizar Imágenes":
             filtered_lotes = sorted(list(set(filtered_lotes)))
             
             if filtered_lotes:
-                lote = st.selectbox("Lote *", filtered_lotes)
+                lote = st.selectbox("Lote *", [""] + filtered_lotes, index=0)
             else:
                 st.warning("⚠️ No hay lotes disponibles para este sector")
                 lote = None
