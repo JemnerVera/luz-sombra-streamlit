@@ -38,6 +38,7 @@ google_sheets_config.json
 
 # Model files (if large)
 *.pkl
+!modelo_perfeccionado.pkl
 *.joblib
 *.h5
 *.pb
