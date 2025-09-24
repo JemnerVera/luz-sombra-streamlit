@@ -53,6 +53,7 @@ config/service_account_google_sheets.json
 config/token.json
 config/credentials.json
 credentials.json
+token.json
 
 # Modelos grandes (excepto el modelo principal)
 # models/*.pkl

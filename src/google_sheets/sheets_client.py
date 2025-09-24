@@ -22,7 +22,7 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 class GoogleSheetsClient:
     """Cliente para interactuar con Google Sheets"""
     
-    def __init__(self, credentials_file: str = 'config/credentials.json', token_file: str = 'config/token.json'):
+    def __init__(self, credentials_file: str = 'credentials.json', token_file: str = 'token.json'):
         self.credentials_file = credentials_file
         self.token_file = token_file
         self.service = None
@@ -41,7 +41,7 @@ class GoogleSheetsClient:
             print(f"⚠️ No se encontraron secrets de Streamlit: {e}")
             # Fallback a configuración local
             try:
-                with open('config/google_sheets_config.json', 'r') as f:
+                with open('google_sheets_config.json', 'r') as f:
                     config = json.load(f)
                     self.spreadsheet_id = config.get('spreadsheet_id')
                 print("✅ Usando configuración local")
