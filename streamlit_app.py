@@ -603,8 +603,6 @@ if page == "Analizar Imágenes":
                             
                     except Exception as e:
                         st.error(f"❌ Error guardando resultados: {str(e)}")
-                    
-                    st.markdown("---")
 
 elif page == "Probar Modelo":
     st.markdown('<h1 class="main-header">🧪 Probar Modelo</h1>', unsafe_allow_html=True)
