@@ -452,39 +452,41 @@ if page == "Analizar Imágenes":
                 st.warning(f"• {file_info}")
             st.info("💡 **Recomendación:** Las imágenes grandes pueden causar problemas de memoria. Considera redimensionarlas antes de subir.")
         
+        st.markdown("---")
         st.subheader("📸 Imágenes Subidas")
         
-        # Mostrar cada imagen en una fila con nombre y botones
+        # Mostrar cada imagen en una fila compacta
         for i, file in enumerate(uploaded_files):
-            # Fila con nombre de archivo y botones
-            st.markdown(f'<div class="file-row">', unsafe_allow_html=True)
-            
-            col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-            
-            with col1:
-                st.write(f"📁 **{file.name}**")
-            
-            with col2:
-                if st.button("👁️ Ver", key=f"view_{i}"):
-                    st.session_state[f"show_image_{i}"] = True
-            
-            with col3:
-                hilera = st.text_input(
-                    "Hilera (opcional)", 
-                    key=f"hilera_{i}",
-                    placeholder="Ej: Hilera A",
-                    value=st.session_state.get(f"hilera_{i}", "")
-                )
-            
-            with col4:
-                n_planta = st.text_input(
-                    "N° Planta (opcional)", 
-                    key=f"n_planta_{i}",
-                    placeholder="Ej: Planta 15",
-                    value=st.session_state.get(f"n_planta_{i}", "")
-                )
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            # Container compacto para cada imagen
+            with st.container():
+                # Fila principal con nombre y botón Ver
+                col1, col2 = st.columns([3, 1])
+                
+                with col1:
+                    st.write(f"📁 **{file.name}**")
+                
+                with col2:
+                    if st.button("👁️ Ver", key=f"view_{i}"):
+                        st.session_state[f"show_image_{i}"] = True
+                
+                # Campos de entrada en la misma fila, más compactos
+                col3, col4 = st.columns([1, 1])
+                
+                with col3:
+                    hilera = st.text_input(
+                        "Hilera (opcional)", 
+                        key=f"hilera_{i}",
+                        placeholder="Ej: Hilera A",
+                        value=st.session_state.get(f"hilera_{i}", "")
+                    )
+                
+                with col4:
+                    n_planta = st.text_input(
+                        "N° Planta (opcional)", 
+                        key=f"n_planta_{i}",
+                        placeholder="Ej: Planta 15",
+                        value=st.session_state.get(f"n_planta_{i}", "")
+                    )
             
             # Mostrar imagen en modal si se presiona Ver
             if st.session_state.get(f"show_image_{i}", False):
