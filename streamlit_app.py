@@ -1,15 +1,24 @@
 import streamlit as st
-import cv2
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from PIL import Image
-import io
-import base64
-from datetime import datetime
-import json
-import os
-import requests
+import sys
+import traceback
+
+# Manejo de errores de importación
+try:
+    import cv2
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from PIL import Image
+    import io
+    import base64
+    from datetime import datetime
+    import json
+    import os
+    import requests
+except ImportError as e:
+    st.error(f"❌ Error importando dependencias: {e}")
+    st.error("Por favor, verifica que todas las dependencias estén instaladas correctamente.")
+    st.stop()
 
 # Configuración de página
 st.set_page_config(
@@ -228,14 +237,19 @@ def analizar_imagen_ml(image_bytes):
             return None
             
         # Importar el servicio de procesamiento original
-        import sys
-        import os
-        sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
-        
-        from services.procesamiento_service_v2 import ProcesamientoServiceV2
-        
-        # Crear instancia del servicio
-        servicio = ProcesamientoServiceV2("models/modelo_perfeccionado.pkl")
+        try:
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+            
+            from services.procesamiento_service_v2 import ProcesamientoServiceV2
+            
+            # Crear instancia del servicio
+            servicio = ProcesamientoServiceV2("models/modelo_perfeccionado.pkl")
+        except Exception as e:
+            st.error(f"❌ Error inicializando el servicio de procesamiento: {e}")
+            st.error("Verifica que el modelo esté disponible y las dependencias estén instaladas.")
+            return None
         
         # Convertir bytes a imagen OpenCV
         nparr = np.frombuffer(image_bytes, np.uint8)
