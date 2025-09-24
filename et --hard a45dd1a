@@ -1,0 +1,20 @@
+[33m7506f8c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Restore original working app from backup
+[33m8ba1f61[m Ultra simple hello world test - remove runtime.txt
+[33mf6833e1[m Ultra minimal test: Only Streamlit, no external dependencies
+[33mf909cc9[m Replace main app with minimal test app for debugging
+[33m4be1d18[m Add diagnostic test apps to identify the root cause of Streamlit Cloud issues
+[33mcd2d877[m Fix app startup: Add error handling for Google Sheets connection and create test app
+[33ma45dd1a[m Fix Streamlit Cloud deployment: Move files to root directory and update paths
+[33m3fffde6[m Fix Python 3.13 compatibility: Use flexible package versions to avoid distutils error
+[33m776790f[m fix: Mejorar compatibilidad y manejo de errores para Streamlit Cloud
+[33ma335f87[m fix: Corregir compatibilidad con Python 3.13 en Streamlit Cloud
+[33m8dcdf9c[m fix: Mejorar compatibilidad y manejo de errores para Streamlit Cloud
+[33m2083583[m fix: Agregar requirements.txt y packages.txt para Streamlit Cloud
+[33m8cf2455[m fix: Incluir modelo en el repositorio para Streamlit Cloud
+[33md0c76dc[m feat: Reorganizar estructura del proyecto para Streamlit
+[33m9b09b72[m Fix UI issues: light input backgrounds, remove dark container, fix dropdown auto-selection
+[33m2520c92[m Fix GoogleSheetsClient to support Service Account authentication in Streamlit Cloud
+[33maa2277b[m Complete merge with remote changes
+[33m1bd9141[m Add comprehensive secrets debug script
+[33m4ce3615[m Added Dev Container Folder
+[33m8bb784e[m Add test script to verify Streamlit Cloud secrets
