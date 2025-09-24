@@ -495,7 +495,6 @@ if page == "Analizar Imágenes":
                     if extracted_hilera and extracted_planta:
                         st.session_state[f"hilera_{i}"] = extracted_hilera
                         st.session_state[f"n_planta_{i}"] = extracted_planta
-                        st.info(f"🔍 Info extraída: Hilera: {extracted_hilera}, Planta: {extracted_planta}")
                 
                 # Campos de entrada en la misma fila, más compactos
                 col3, col4 = st.columns([1, 1])
@@ -504,16 +503,14 @@ if page == "Analizar Imágenes":
                     hilera = st.text_input(
                         "Hilera (opcional)", 
                         key=f"hilera_{i}",
-                        placeholder="Ej: Hilera A",
-                        value=st.session_state.get(f"hilera_{i}", "")
+                        placeholder="Ej: Hilera A"
                     )
                 
                 with col4:
                     n_planta = st.text_input(
                         "N° Planta (opcional)", 
                         key=f"n_planta_{i}",
-                        placeholder="Ej: Planta 15",
-                        value=st.session_state.get(f"n_planta_{i}", "")
+                        placeholder="Ej: Planta 15"
                     )
             
             # Mostrar imagen en modal si se presiona Ver
