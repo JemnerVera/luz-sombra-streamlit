@@ -479,8 +479,15 @@ if page == "Analizar Imágenes":
         for i, file in enumerate(uploaded_files):
             # Container compacto para cada imagen
             with st.container():
-                # Fila principal con nombre y botón Ver
-                col1, col2 = st.columns([3, 1])
+                # Extraer información del nombre del archivo si no está ya guardada
+                if f"hilera_{i}" not in st.session_state or f"n_planta_{i}" not in st.session_state:
+                    extracted_hilera, extracted_planta = extract_info_from_filename(file.name)
+                    if extracted_hilera and extracted_planta:
+                        st.session_state[f"hilera_{i}"] = extracted_hilera
+                        st.session_state[f"n_planta_{i}"] = extracted_planta
+                
+                # Todo en una sola fila: nombre, botón ver, hilera, planta
+                col1, col2, col3, col4 = st.columns([4, 1, 2, 2])
                 
                 with col1:
                     st.write(f"📁 **{file.name}**")
@@ -489,28 +496,20 @@ if page == "Analizar Imágenes":
                     if st.button("👁️ Ver", key=f"view_{i}"):
                         st.session_state[f"show_image_{i}"] = True
                 
-                # Extraer información del nombre del archivo si no está ya guardada
-                if f"hilera_{i}" not in st.session_state or f"n_planta_{i}" not in st.session_state:
-                    extracted_hilera, extracted_planta = extract_info_from_filename(file.name)
-                    if extracted_hilera and extracted_planta:
-                        st.session_state[f"hilera_{i}"] = extracted_hilera
-                        st.session_state[f"n_planta_{i}"] = extracted_planta
-                
-                # Campos de entrada en la misma fila, más compactos
-                col3, col4 = st.columns([1, 1])
-                
                 with col3:
                     hilera = st.text_input(
-                        "Hilera (opcional)", 
+                        "Hilera", 
                         key=f"hilera_{i}",
-                        placeholder="Ej: Hilera A"
+                        placeholder="Ej: 114",
+                        label_visibility="collapsed"
                     )
                 
                 with col4:
                     n_planta = st.text_input(
-                        "N° Planta (opcional)", 
+                        "N° Planta", 
                         key=f"n_planta_{i}",
-                        placeholder="Ej: Planta 15"
+                        placeholder="Ej: 22",
+                        label_visibility="collapsed"
                     )
             
             # Mostrar imagen en modal si se presiona Ver
