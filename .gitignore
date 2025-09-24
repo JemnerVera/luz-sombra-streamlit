@@ -28,30 +28,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# Streamlit
-.streamlit/
-
-# Google Sheets credentials
-credentials.json
-token.json
-google_sheets_config.json
-
-# Model files (if large)
-*.pkl
-!modelo_perfeccionado.pkl
-*.joblib
-*.h5
-*.pb
-
-# Images (test images)
-foto-prueba-*.jpg
-foto-prueba-*.png
-foto-prueba-*.jpeg
-
-# Logs
-*.log
-logs/
-
 # IDE
 .vscode/
 .idea/
@@ -68,28 +44,37 @@ logs/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
+# Streamlit
+.streamlit/
+
+# Configuración sensible
+config/google_sheets_config.json
+config/service_account_google_sheets.json
+config/token.json
+config/credentials.json
+credentials.json
+
+# Modelos grandes
+models/*.pkl
+models/*.h5
+models/*.joblib
+
+# Resultados de procesamiento
+resultados/
+output/
 temp/
-tmp/
 
-# Node.js (if any)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Logs
+*.log
+logs/
 
-# React build (if any)
-build/
-dist/
+# Datos sensibles
+dataset/imagenes/
+dataset/anotaciones/
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Cache
+.cache/
+*.cache
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -97,7 +82,6 @@ dist/
 # pytest
 .pytest_cache/
 .coverage
-htmlcov/
 
 # mypy
 .mypy_cache/

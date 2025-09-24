@@ -23,7 +23,7 @@ st.set_page_config(
 @st.cache_data
 def download_model_if_needed():
     """Descarga el modelo si no existe localmente"""
-    model_path = "modelo_perfeccionado.pkl"
+    model_path = "models/modelo_perfeccionado.pkl"
     
     if not os.path.exists(model_path):
         st.warning("⚠️ Modelo no encontrado localmente. Necesitas subirlo manualmente.")
@@ -235,7 +235,7 @@ def analizar_imagen_ml(image_bytes):
         from services.procesamiento_service_v2 import ProcesamientoServiceV2
         
         # Crear instancia del servicio
-        servicio = ProcesamientoServiceV2("modelo_perfeccionado.pkl")
+        servicio = ProcesamientoServiceV2("models/modelo_perfeccionado.pkl")
         
         # Convertir bytes a imagen OpenCV
         nparr = np.frombuffer(image_bytes, np.uint8)
@@ -582,7 +582,7 @@ elif page == "Historial":
                 # Cargar configuración para obtener el nombre de la hoja
                 import json
                 try:
-                    with open('google_sheets_config.json', 'r') as f:
+                    with open('config/google_sheets_config.json', 'r') as f:
                         config = json.load(f)
                         sheet_name = config.get('sheet_name', 'Data-app')
                 except:

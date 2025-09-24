@@ -1,123 +1,209 @@
-# 🌱 Análisis Agrícola - Luz y Sombra
+# 🌱 Análisis Agrícola Luz-Sombra
 
-Aplicación Streamlit para el análisis de luz y sombra en imágenes agrícolas usando Machine Learning.
+Aplicación web para análisis de luz y sombra en imágenes agrícolas usando **Streamlit** y **Machine Learning**.
+
+## 📋 Descripción
+
+Esta aplicación permite analizar imágenes agrícolas para determinar el porcentaje de luz y sombra presente, utilizando un modelo de Random Forest entrenado. Los resultados se almacenan automáticamente en Google Sheets.
 
 ## 🚀 Características
 
-- **Análisis de Imágenes**: Procesamiento de múltiples imágenes con modelo Random Forest
-- **Probar Modelo**: Visualización comparativa de análisis de luz y sombra
-- **Historial**: Registro completo de análisis en Google Sheets
-- **Interfaz Intuitiva**: Dropdowns dinámicos con filtros jerárquicos
-- **Integración Google Sheets**: Sincronización automática de datos
-
-## 📋 Requisitos
-
-- Python 3.8+
-- Streamlit
-- OpenCV
-- scikit-learn
-- Google Sheets API
-
-## 🛠️ Instalación
-
-1. **Clonar el repositorio:**
-```bash
-git clone https://github.com/JemnerVera/luz-sombra-streamlit.git
-cd luz-sombra-streamlit
-```
-
-2. **Crear entorno virtual:**
-```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
-```
-
-3. **Instalar dependencias:**
-```bash
-pip install -r requirements_streamlit.txt
-```
-
-4. **Configurar Google Sheets:**
-   - Copiar `google_sheets_config.json` con tus credenciales
-   - Configurar `credentials.json` para la API de Google Sheets
-
-## 🎯 Uso
-
-1. **Ejecutar la aplicación:**
-```bash
-streamlit run streamlit_app.py --server.port 8504
-```
-
-2. **Abrir en el navegador:**
-   - URL: http://localhost:8504
-
-## 📊 Funcionalidades
-
-### Analizar Imágenes
-- Selección de campos: Empresa, Fundo, Sector, Lote
-- Carga múltiple de imágenes
-- Análisis con modelo Random Forest
-- Guardado automático en Google Sheets
-
-### Probar Modelo
-- Visualización comparativa
-- Análisis de luz (amarillo) y sombra (gris oscuro)
-- Métricas de porcentaje
-
-### Historial
-- Registro completo de análisis
-- Filtros y búsqueda
-- Exportación a CSV
-
-## 🔧 Configuración
-
-### Google Sheets
-1. Crear proyecto en Google Cloud Console
-2. Habilitar Google Sheets API
-3. Crear credenciales OAuth 2.0
-4. Configurar `google_sheets_config.json`
-
-### Modelo ML
-- El modelo se carga desde `modelo_perfeccionado.pkl`
-- Usa Random Forest de scikit-learn
-- Análisis de características de imagen optimizadas
+- **📸 Análisis de Imágenes**: Upload múltiple con información del campo
+- **🧪 Probar Modelo**: Prueba individual con visualización
+- **📊 Historial**: Registro de análisis con filtros
+- **🎨 Interfaz Moderna**: Diseño intuitivo y responsivo
+- **⚡ Procesamiento Rápido**: Modelo Random Forest optimizado
+- **📈 Integración Google Sheets**: Almacenamiento automático de resultados
 
 ## 📁 Estructura del Proyecto
 
 ```
-luz-sombra-streamlit/
-├── streamlit_app.py              # Aplicación principal
-├── requirements_streamlit.txt    # Dependencias Python
-├── src/
+app-luz-sombra-py/
+├── 📁 config/                    # Archivos de configuración
+│   ├── google_sheets_config.json
+│   ├── service_account_google_sheets.json
+│   └── token.json
+├── 📁 docs/                      # Documentación
+│   ├── README_STREAMLIT.md
+│   ├── GOOGLE_SHEETS_SETUP.md
+│   ├── SETUP_COMPLETO.md
+│   ├── streamlit_deploy.md
+│   └── streamlit_secrets_guide.md
+├── 📁 models/                    # Modelos de ML
+│   └── modelo_perfeccionado.pkl
+├── 📁 scripts/                   # Scripts de ejecución
+│   ├── start_app.bat
+│   └── run_streamlit.bat
+├── 📁 src/                       # Código fuente
+│   ├── alertas/
+│   ├── analisis/
+│   ├── clasificacion/
+│   ├── database/
+│   ├── entrenamiento/
+│   ├── evaluacion/
+│   ├── google_sheets/
+│   ├── metadata/
+│   ├── procesamiento/
 │   ├── services/
-│   │   └── procesamiento_service_v2.py  # Servicio de ML
-│   └── google_sheets/
-│       └── sheets_client.py      # Cliente Google Sheets
-├── modelo_perfeccionado.pkl      # Modelo entrenado
-├── google_sheets_config.json     # Configuración Google Sheets
-├── credentials.json              # Credenciales API
-└── README.md
+│   └── visualizacion/
+├── 📁 dataset/                   # Datos de entrenamiento
+│   ├── anotaciones/
+│   └── imagenes/
+├── 📁 resultados/                # Imágenes procesadas
+├── 📁 venv/                      # Entorno virtual Python
+├── streamlit_app.py              # Aplicación principal
+└── requirements_streamlit.txt    # Dependencias
 ```
 
-## 🤝 Contribución
+## 🛠️ Instalación y Uso
+
+### Opción 1: Ejecutar directamente
+```bash
+# Instalar dependencias
+pip install -r requirements_streamlit.txt
+
+# Ejecutar aplicación
+streamlit run streamlit_app.py
+```
+
+### Opción 2: Usar script automático
+```bash
+# En Windows
+scripts/start_app.bat
+
+# O directamente
+scripts/run_streamlit.bat
+```
+
+## 🌐 Deploy en Streamlit Cloud
+
+1. **Subir a GitHub**:
+   ```bash
+   git add .
+   git commit -m "Add Streamlit app"
+   git push origin main
+   ```
+
+2. **Conectar con Streamlit Cloud**:
+   - Ve a [share.streamlit.io](https://share.streamlit.io)
+   - Conecta tu cuenta GitHub
+   - Selecciona el repositorio
+   - Configura:
+     - **Main file path**: `streamlit_app.py`
+     - **Python version**: 3.11
+
+3. **Configurar Secrets**:
+   - Ve a Settings > Secrets
+   - Agrega las variables de Google Sheets
+
+## 📱 Uso de la Aplicación
+
+### Tab "Analizar Imágenes"
+1. **Completa información del campo**:
+   - Empresa, Fundo, Sector, Lote (obligatorios)
+   - Hilera, N° Planta (opcionales)
+2. **Sube imágenes** (múltiples)
+3. **Haz clic en "Analizar Imágenes"**
+4. **Ve resultados** con visualización
+
+### Tab "Probar Modelo"
+1. **Sube una imagen** para probar
+2. **Ve análisis visual** con colores:
+   - 🟡 **Amarillo**: Áreas de luz
+   - ⚫ **Gris oscuro**: Áreas de sombra
+3. **Revisa métricas** de porcentajes
+
+### Tab "Historial"
+1. **Filtra resultados** por empresa/fecha
+2. **Ve tabla** con todos los análisis
+3. **Exporta CSV** si es necesario
+
+## 🔧 Configuración
+
+### Google Sheets
+1. Configura las credenciales en `config/`
+2. Actualiza `config/google_sheets_config.json`
+3. Verifica permisos en Google Sheets
+
+### Modelo ML
+- El modelo se encuentra en `models/modelo_perfeccionado.pkl`
+- Es un Random Forest entrenado con scikit-learn
+- Procesa características de textura y color
+
+## 📊 Algoritmo de Análisis
+
+### 1. Preprocesamiento
+- **Conversión a Lab**: Mejor separación de luz/color
+- **Redimensionamiento**: Acelera procesamiento
+- **Normalización**: Valores float32 para ML
+
+### 2. Random Forest
+- **100 árboles** por defecto
+- **Características**: Textura, color, estadísticas
+- **Clasificación**: Luz vs Sombra por píxel
+
+### 3. Postprocesamiento
+- **Morfología**: Refinamiento de máscaras
+- **Filtrado**: Eliminación de ruido
+- **Cálculo**: Porcentajes finales
+
+### 4. Visualización
+- **Imagen original**: Sin modificar
+- **Análisis**: Colores superpuestos
+- **Métricas**: Porcentajes calculados
+
+## 🐛 Solución de Problemas
+
+### Error: "Module not found"
+```bash
+pip install -r requirements_streamlit.txt
+```
+
+### Error: "Modelo no encontrado"
+- Verifica que `models/modelo_perfeccionado.pkl` existe
+- El modelo se descarga automáticamente si está en secrets
+
+### Error: "Google Sheets no conecta"
+- Verifica credenciales en `config/`
+- Revisa permisos en Google Sheets
+- Confirma que el spreadsheet_id es correcto
+
+### Puerto ocupado
+```bash
+streamlit run streamlit_app.py --server.port 8502
+```
+
+## 📈 Próximas Mejoras
+
+- [ ] **Análisis GPS**: Coordenadas automáticas
+- [ ] **Modelo mejorado**: Deep Learning
+- [ ] **Exportación**: PDF con resultados
+- [ ] **Filtros avanzados**: Por fecha, empresa, etc.
+- [ ] **Dashboard**: Estadísticas en tiempo real
+
+## 🤝 Contribuir
 
 1. Fork el proyecto
-2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
+2. Crea una rama: `git checkout -b feature/nueva-funcionalidad`
+3. Commit: `git commit -m 'Add nueva funcionalidad'`
+4. Push: `git push origin feature/nueva-funcionalidad`
+5. Abre un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+Este proyecto está bajo la Licencia MIT.
 
-## 👥 Autores
+## 📞 Soporte
 
-- **Jemner Vera** - *Desarrollo inicial* - [JemnerVera](https://github.com/JemnerVera)
+Para soporte técnico, contacta al equipo de desarrollo.
 
-## 🙏 Agradecimientos
+---
 
-- Modelo de Machine Learning desarrollado con scikit-learn
-- Integración con Google Sheets API
-- Interfaz desarrollada con Streamlit
+**🌱 Desarrollado con Streamlit para análisis agrícola**
+
+## 🔗 Enlaces Útiles
+
+- [Documentación Streamlit](https://docs.streamlit.io/)
+- [Google Sheets API](https://developers.google.com/sheets/api)
+- [scikit-learn](https://scikit-learn.org/)
+- [OpenCV](https://opencv.org/)

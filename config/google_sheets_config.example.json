@@ -1,0 +1,16 @@
+{
+  "spreadsheet_id": "TU_SPREADSHEET_ID_AQUI",
+  "sheet_name": "Data-app",
+  "description": "Configuración de Google Sheets para la aplicación de análisis agrícola",
+  "instructions": [
+    "1. Copia este archivo como 'google_sheets_config.json'",
+    "2. Reemplaza 'TU_SPREADSHEET_ID_AQUI' con el ID real de tu hoja de cálculo",
+    "3. Ajusta 'sheet_name' si usas un nombre diferente para la hoja",
+    "4. Asegúrate de que las credenciales estén en 'service_account_google_sheets.json'"
+  ],
+  "spreadsheet_url_example": "https://docs.google.com/spreadsheets/d/TU_SPREADSHEET_ID_AQUI/edit",
+  "required_permissions": [
+    "Editor o Propietario de la hoja de cálculo",
+    "Acceso a Google Sheets API habilitado"
+  ]
+}
