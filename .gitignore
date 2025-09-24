@@ -54,8 +54,8 @@ config/token.json
 config/credentials.json
 credentials.json
 
-# Modelos grandes
-models/*.pkl
+# Modelos grandes (excepto el modelo principal)
+# models/*.pkl
 models/*.h5
 models/*.joblib
 
