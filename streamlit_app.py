@@ -500,16 +500,14 @@ if page == "Analizar Imágenes":
                     hilera = st.text_input(
                         "Hilera", 
                         key=f"hilera_{i}",
-                        placeholder="Ej: 114",
-                        label_visibility="collapsed"
+                        placeholder="Ej: 114"
                     )
                 
                 with col4:
                     n_planta = st.text_input(
                         "N° Planta", 
                         key=f"n_planta_{i}",
-                        placeholder="Ej: 22",
-                        label_visibility="collapsed"
+                        placeholder="Ej: 22"
                     )
             
             # Mostrar imagen en modal si se presiona Ver
