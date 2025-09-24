@@ -778,23 +778,6 @@ elif page == "Historial":
             
             # Mostrar tabla
             st.dataframe(df, use_container_width=True, hide_index=True)
-            
-            # Estadísticas
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Total registros", len(df))
-            with col2:
-                if len(df) > 0:
-                    # Convertir a float y calcular promedio
-                    light_values = pd.to_numeric(df['porcentaje_luz'], errors='coerce')
-                    avg_light = light_values.mean()
-                    st.metric("Luz promedio", f"{avg_light:.1f}%")
-            with col3:
-                if len(df) > 0:
-                    # Convertir a float y calcular promedio
-                    shadow_values = pd.to_numeric(df['porcentaje_sombra'], errors='coerce')
-                    avg_shadow = shadow_values.mean()
-                    st.metric("Sombra promedio", f"{avg_shadow:.1f}%")
         else:
             st.info("📝 No hay registros de análisis aún. Sube algunas imágenes para comenzar.")
             
