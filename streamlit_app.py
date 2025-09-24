@@ -319,6 +319,77 @@ def extract_info_from_filename(filename):
     
     return None, None
 
+# Función para extraer información GPS de la imagen
+def extract_gps_info(image_bytes):
+    """
+    Extrae información GPS de los metadatos EXIF de la imagen
+    Retorna: (latitud, longitud) si encuentra GPS, (None, None) si no
+    """
+    try:
+        from PIL import Image
+        from PIL.ExifTags import TAGS, GPSTAGS
+        import io
+        
+        # Crear objeto Image desde bytes
+        image = Image.open(io.BytesIO(image_bytes))
+        
+        # Obtener metadatos EXIF
+        exifdata = image.getexif()
+        
+        # Buscar información GPS
+        gps_info = None
+        for tag_id in exifdata:
+            tag = TAGS.get(tag_id, tag_id)
+            if tag == "GPSInfo":
+                gps_info = exifdata[tag_id]
+                break
+        
+        if gps_info:
+            # Extraer latitud y longitud
+            lat = gps_info.get(2)  # GPSLatitude
+            lat_ref = gps_info.get(1)  # GPSLatitudeRef
+            lon = gps_info.get(4)  # GPSLongitude  
+            lon_ref = gps_info.get(3)  # GPSLongitudeRef
+            
+            if lat and lon:
+                # Convertir a decimal
+                lat_decimal = convert_to_decimal(lat, lat_ref)
+                lon_decimal = convert_to_decimal(lon, lon_ref)
+                
+                if lat_decimal and lon_decimal:
+                    return lat_decimal, lon_decimal
+        
+        return None, None
+        
+    except Exception as e:
+        # Si hay cualquier error, retornar None (sin GPS)
+        print(f"⚠️ Error leyendo GPS: {str(e)}")
+        return None, None
+
+def convert_to_decimal(coord, ref):
+    """
+    Convierte coordenadas GPS de grados/minutos/segundos a decimal
+    """
+    try:
+        if not coord or not ref:
+            return None
+            
+        # coord es una tupla (grados, minutos, segundos)
+        degrees = float(coord[0])
+        minutes = float(coord[1])
+        seconds = float(coord[2])
+        
+        decimal = degrees + (minutes / 60.0) + (seconds / 3600.0)
+        
+        # Aplicar referencia (N/S, E/W)
+        if ref in ['S', 'W']:
+            decimal = -decimal
+            
+        return decimal
+        
+    except Exception:
+        return None
+
 # Función para mostrar resultados
 def mostrar_resultados(resultado, nombre_archivo, mostrar_imagenes=False):
     """Mostrar resultados del análisis"""
@@ -486,28 +557,57 @@ if page == "Analizar Imágenes":
                         st.session_state[f"hilera_{i}"] = extracted_hilera
                         st.session_state[f"n_planta_{i}"] = extracted_planta
                 
-                # Todo en una sola fila: nombre, botón ver, hilera, planta
-                col1, col2, col3, col4 = st.columns([4, 1, 2, 2])
+                # Detectar GPS si no está ya guardado
+                if f"gps_detected_{i}" not in st.session_state:
+                    try:
+                        # Leer imagen para detectar GPS
+                        file.seek(0)  # Resetear posición del archivo
+                        image_bytes = file.read()
+                        file.seek(0)  # Resetear para uso posterior
+                        
+                        lat, lon = extract_gps_info(image_bytes)
+                        st.session_state[f"gps_detected_{i}"] = lat is not None and lon is not None
+                        if lat and lon:
+                            st.session_state[f"gps_lat_{i}"] = lat
+                            st.session_state[f"gps_lon_{i}"] = lon
+                    except Exception as e:
+                        # Si hay error, asumir sin GPS
+                        st.session_state[f"gps_detected_{i}"] = False
+                        print(f"⚠️ Error detectando GPS para {file.name}: {str(e)}")
+                
+                # Todo en una sola fila: nombre, GPS status, botón ver, hilera, planta
+                col1, col2, col3, col4, col5 = st.columns([3, 1, 1, 2, 2])
                 
                 with col1:
                     st.write(f"📁 **{file.name}**")
                 
                 with col2:
+                    # Mostrar estado GPS
+                    if st.session_state.get(f"gps_detected_{i}", False):
+                        st.markdown('<span style="color: green; font-size: 0.8em;">📍 GPS</span>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<span style="color: red; font-size: 0.8em;">❌ Sin GPS</span>', unsafe_allow_html=True)
+                
+                with col3:
                     if st.button("👁️ Ver", key=f"view_{i}"):
                         st.session_state[f"show_image_{i}"] = True
                 
-                with col3:
+                with col4:
+                    # Campos condicionales basados en GPS
+                    gps_detected = st.session_state.get(f"gps_detected_{i}", False)
                     hilera = st.text_input(
                         "Hilera", 
                         key=f"hilera_{i}",
-                        placeholder="Ej: 114"
+                        placeholder="Ej: 114",
+                        disabled=gps_detected
                     )
                 
-                with col4:
+                with col5:
                     n_planta = st.text_input(
                         "N° Planta", 
                         key=f"n_planta_{i}",
-                        placeholder="Ej: 22"
+                        placeholder="Ej: 22",
+                        disabled=gps_detected
                     )
             
             # Mostrar imagen en modal si se presiona Ver
@@ -569,6 +669,10 @@ if page == "Analizar Imágenes":
                             print("❌ Error de autenticación")
                         else:
                             # Preparar datos para guardar
+                            # Obtener coordenadas GPS si están disponibles
+                            gps_lat = st.session_state.get(f"gps_lat_{i}", "")
+                            gps_lon = st.session_state.get(f"gps_lon_{i}", "")
+                            
                             record_data = {
                                 'id': '',  # Se generará automáticamente
                                 'fecha': datetime.now().strftime('%Y-%m-%d'),
@@ -580,8 +684,8 @@ if page == "Analizar Imágenes":
                                 'lote': lote,
                                 'hilera': hilera_info if hilera_info else '',
                                 'numero_planta': n_planta_info if n_planta_info else '',
-                                'latitud': '',
-                                'longitud': '',
+                                'latitud': gps_lat if gps_lat else '',
+                                'longitud': gps_lon if gps_lon else '',
                                 'porcentaje_luz': float(resultado['light_percentage']),  # Convertir a float
                                 'porcentaje_sombra': float(resultado['shadow_percentage']),  # Convertir a float
                                 'dispositivo': '{}',
