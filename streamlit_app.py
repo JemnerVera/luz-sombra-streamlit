@@ -10,6 +10,7 @@ from datetime import datetime
 import json
 import os
 import requests
+import gc  # Para limpieza de memoria
 
 # Configuración de página
 st.set_page_config(
@@ -240,6 +241,21 @@ def analizar_imagen_ml(image_bytes):
         # Convertir bytes a imagen OpenCV
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Optimización para imágenes grandes: redimensionar si es necesario
+        original_height, original_width = img.shape[:2]
+        max_dimension = 2048  # Máximo 2048px en cualquier dimensión
+        
+        if original_height > max_dimension or original_width > max_dimension:
+            # Calcular factor de escala
+            scale_factor = min(max_dimension / original_height, max_dimension / original_width)
+            new_width = int(original_width * scale_factor)
+            new_height = int(original_height * scale_factor)
+            
+            # Redimensionar imagen
+            img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_AREA)
+            st.info(f"📏 Imagen redimensionada de {original_width}x{original_height} a {new_width}x{new_height} para optimizar memoria")
+        
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         
         # Procesar imagen con el modelo original
@@ -251,7 +267,7 @@ def analizar_imagen_ml(image_bytes):
         analysis_img[light_mask == 128] = [50, 50, 50]  # Gris oscuro para sombra
         analysis_img[light_mask == 255] = [255, 255, 0]  # Amarillo para luz
         
-        return {
+        result = {
             'light_percentage': light_percentage,
             'shadow_percentage': shadow_percentage,
             'analysis_image': analysis_img,
@@ -259,8 +275,28 @@ def analizar_imagen_ml(image_bytes):
             'processing_time': 0
         }
         
+        # Limpiar variables grandes de memoria
+        del img, img_rgb, nparr
+        if 'light_mask' in locals():
+            del light_mask
+        if 'analysis_img' in locals():
+            del analysis_img
+        
+        # Forzar limpieza de memoria
+        gc.collect()
+            
+        return result
+        
     except Exception as e:
         st.error(f"Error en análisis ML: {str(e)}")
+        # Limpiar memoria en caso de error
+        if 'img' in locals():
+            del img
+        if 'img_rgb' in locals():
+            del img_rgb
+        if 'nparr' in locals():
+            del nparr
+        gc.collect()
         return None
 
 # Función para mostrar resultados
@@ -397,11 +433,25 @@ if page == "Analizar Imágenes":
         "Arrastra y suelta las imágenes aquí",
         type=['jpg', 'png', 'jpeg'],
         accept_multiple_files=True,
-        help="Puedes subir múltiples imágenes para análisis"
+        help="Puedes subir múltiples imágenes para análisis. Tamaño máximo recomendado: 5MB por imagen"
     )
     
     # Mostrar imágenes subidas con botones
     if uploaded_files:
+        # Validar tamaño de archivos
+        max_file_size = 10 * 1024 * 1024  # 10MB en bytes
+        large_files = []
+        
+        for file in uploaded_files:
+            if file.size > max_file_size:
+                large_files.append(f"{file.name} ({file.size / (1024*1024):.1f}MB)")
+        
+        if large_files:
+            st.warning(f"⚠️ **Archivos muy grandes detectados:**")
+            for file_info in large_files:
+                st.warning(f"• {file_info}")
+            st.info("💡 **Recomendación:** Las imágenes grandes pueden causar problemas de memoria. Considera redimensionarlas antes de subir.")
+        
         st.subheader("📸 Imágenes Subidas")
         
         # Mostrar cada imagen en una fila con nombre y botones

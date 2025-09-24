@@ -1,0 +1,20 @@
+[33m25a596e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Fix: Solucionado error de lectura de imagen y línea de separación duplicada
+[33m78f8736[m fix: Corregir estructura del bloque try-except
+[33m7317c0a[m fix: Corregir error de indentación en inicialización de CSV
+[33m79c339c[m fix: Mover inicialización de batch_csv_data fuera del bloque try-except
+[33m1cf693e[m debug: Agregar logging detallado para diagnóstico de CSV
+[33m197c0d7[m fix: Corregir error de indentación en streamlit_app.py
+[33ma2bed78[m feat: Subir CSV automáticamente a Google Drive
+[33m91915a4[m feat: Implementar descarga CSV para batch de análisis
+[33mc58e6a8[m Add detailed logging for spreadsheet creation debugging
+[33m628407b[m Fix authentication: Add Service Account file support for local development
+[33m78cb14a[m Fix batch saving: Add Google Drive integration to save batch sheets in specific folder
+[33mcbd861c[m Add batch saving options: Guardar en Histórico and Guardar Aparte functionality
+[33m85c159c[m Fix column mapping: Add missing 'Nombre Archivo' column to correct data alignment
+[33m8024a3a[m WORKING VERSION: Restore functional version from 23/09/25
+[33m9b09b72[m[33m ([m[1;31morigin/working-yesterday[m[33m, [m[1;32mworking-yesterday[m[33m)[m Fix UI issues: light input backgrounds, remove dark container, fix dropdown auto-selection
+[33m2520c92[m Fix GoogleSheetsClient to support Service Account authentication in Streamlit Cloud
+[33maa2277b[m Complete merge with remote changes
+[33m1bd9141[m Add comprehensive secrets debug script
+[33m4ce3615[m Added Dev Container Folder
+[33m8bb784e[m Add test script to verify Streamlit Cloud secrets
