@@ -299,6 +299,26 @@ def analizar_imagen_ml(image_bytes):
         gc.collect()
         return None
 
+# Función para extraer información del nombre del archivo
+def extract_info_from_filename(filename):
+    """
+    Extrae información de Hilera y Planta del nombre del archivo
+    Formato esperado: H###_P### o similar
+    Ejemplo: E07_92_H122_P22.jpg -> Hilera: 122, Planta: 22
+    """
+    import re
+    
+    # Patrón para extraer H### y P###
+    pattern = r'H(\d+).*?P(\d+)'
+    match = re.search(pattern, filename, re.IGNORECASE)
+    
+    if match:
+        hilera = match.group(1)
+        planta = match.group(2)
+        return hilera, planta
+    
+    return None, None
+
 # Función para mostrar resultados
 def mostrar_resultados(resultado, nombre_archivo, mostrar_imagenes=False):
     """Mostrar resultados del análisis"""
@@ -468,6 +488,14 @@ if page == "Analizar Imágenes":
                 with col2:
                     if st.button("👁️ Ver", key=f"view_{i}"):
                         st.session_state[f"show_image_{i}"] = True
+                
+                # Extraer información del nombre del archivo si no está ya guardada
+                if f"hilera_{i}" not in st.session_state or f"n_planta_{i}" not in st.session_state:
+                    extracted_hilera, extracted_planta = extract_info_from_filename(file.name)
+                    if extracted_hilera and extracted_planta:
+                        st.session_state[f"hilera_{i}"] = extracted_hilera
+                        st.session_state[f"n_planta_{i}"] = extracted_planta
+                        st.info(f"🔍 Info extraída: Hilera: {extracted_hilera}, Planta: {extracted_planta}")
                 
                 # Campos de entrada en la misma fila, más compactos
                 col3, col4 = st.columns([1, 1])
